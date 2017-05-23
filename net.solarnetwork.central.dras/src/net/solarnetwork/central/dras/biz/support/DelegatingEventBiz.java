@@ -25,9 +25,8 @@
 package net.solarnetwork.central.dras.biz.support;
 
 import java.util.List;
-
 import net.solarnetwork.central.dao.ObjectCriteria;
-import net.solarnetwork.central.dao.SortDescriptor;
+import net.solarnetwork.central.domain.SortDescriptor;
 import net.solarnetwork.central.dras.biz.EventBiz;
 import net.solarnetwork.central.dras.dao.EventFilter;
 import net.solarnetwork.central.dras.domain.Event;
@@ -37,16 +36,17 @@ import net.solarnetwork.central.dras.domain.Match;
  * Delegating {@link EventBiz}, to support AOP with OSGi services.
  * 
  * @author matt
- * @version $Revision$
+ * @version 1.1
  */
 public class DelegatingEventBiz implements EventBiz {
 
-	private EventBiz delegate;
+	private final EventBiz delegate;
 
 	/**
 	 * Construct with delegate.
 	 * 
-	 * @param delegate the delegate
+	 * @param delegate
+	 *        the delegate
 	 */
 	public DelegatingEventBiz(EventBiz delegate) {
 		this.delegate = delegate;

@@ -26,9 +26,8 @@ package net.solarnetwork.central.dras.biz.support;
 
 import java.util.List;
 import java.util.Set;
-
 import net.solarnetwork.central.dao.ObjectCriteria;
-import net.solarnetwork.central.dao.SortDescriptor;
+import net.solarnetwork.central.domain.SortDescriptor;
 import net.solarnetwork.central.dras.biz.ProgramBiz;
 import net.solarnetwork.central.dras.dao.ProgramFilter;
 import net.solarnetwork.central.dras.domain.Constraint;
@@ -39,16 +38,17 @@ import net.solarnetwork.central.dras.domain.Program;
  * Delegating {@link ProgramBiz}, to support AOP with OSGi services.
  * 
  * @author matt
- * @version $Revision$
+ * @version 1.1
  */
 public class DelegatingProgramBiz implements ProgramBiz {
 
-	private ProgramBiz delegate;
-	
+	private final ProgramBiz delegate;
+
 	/**
 	 * Constructor.
 	 * 
-	 * @param delegate the delegate
+	 * @param delegate
+	 *        the delegate
 	 */
 	public DelegatingProgramBiz(ProgramBiz delegate) {
 		super();
@@ -70,5 +70,5 @@ public class DelegatingProgramBiz implements ProgramBiz {
 	public Set<Constraint> getProgramConstraints(Long programId) {
 		return delegate.getProgramConstraints(programId);
 	}
-	
+
 }

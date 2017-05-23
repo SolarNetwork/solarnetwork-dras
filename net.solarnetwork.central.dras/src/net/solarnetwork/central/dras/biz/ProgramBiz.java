@@ -26,9 +26,8 @@ package net.solarnetwork.central.dras.biz;
 
 import java.util.List;
 import java.util.Set;
-
 import net.solarnetwork.central.dao.ObjectCriteria;
-import net.solarnetwork.central.dao.SortDescriptor;
+import net.solarnetwork.central.domain.SortDescriptor;
 import net.solarnetwork.central.dras.dao.ProgramFilter;
 import net.solarnetwork.central.dras.domain.Constraint;
 import net.solarnetwork.central.dras.domain.Match;
@@ -38,39 +37,45 @@ import net.solarnetwork.central.dras.domain.Program;
  * Program observer API.
  * 
  * @author matt
- * @version $Revision$
+ * @version 1.1
  */
 public interface ProgramBiz {
 
 	/**
 	 * Find programs, optionally sorted in some way.
 	 * 
-	 * <p>If specific ordering is required, the {@code sortDescriptors} parameter
-	 * can be used to sort the results, where sort keys are {@link Program} property names.
-	 * If no {@code sortDescriptors} are provided, the results will be sorted by
-	 * {@code name}, in an ascending manner.</p>
+	 * <p>
+	 * If specific ordering is required, the {@code sortDescriptors} parameter
+	 * can be used to sort the results, where sort keys are {@link Program}
+	 * property names. If no {@code sortDescriptors} are provided, the results
+	 * will be sorted by {@code name}, in an ascending manner.
+	 * </p>
 	 * 
-	 * @param criteria an optional search criteria
-	 * @param sortDescriptors an optional list of sort descriptors to order the results by
+	 * @param criteria
+	 *        an optional search criteria
+	 * @param sortDescriptors
+	 *        an optional list of sort descriptors to order the results by
 	 * @return set of programs, or an empty set if none found
 	 */
-	List<Match> findPrograms(ObjectCriteria<ProgramFilter> criteria, 
+	List<Match> findPrograms(ObjectCriteria<ProgramFilter> criteria,
 			List<SortDescriptor> sortDescriptors);
-	
+
 	/**
 	 * Get a single Program by its ID.
 	 * 
-	 * @param programId the ID of the program to get
+	 * @param programId
+	 *        the ID of the program to get
 	 * @return the Program
 	 */
 	Program getProgram(Long programId);
-	
+
 	/**
 	 * Get the complete set of program constraints.
 	 * 
-	 * @param programId the program ID to get the constraints for
+	 * @param programId
+	 *        the program ID to get the constraints for
 	 * @return the constraints, never <em>null</em>
 	 */
 	Set<Constraint> getProgramConstraints(Long programId);
-	
+
 }

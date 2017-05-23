@@ -25,9 +25,8 @@
 package net.solarnetwork.central.dras.biz;
 
 import java.util.List;
-
 import net.solarnetwork.central.dao.ObjectCriteria;
-import net.solarnetwork.central.dao.SortDescriptor;
+import net.solarnetwork.central.domain.SortDescriptor;
 import net.solarnetwork.central.dras.dao.LocationFilter;
 import net.solarnetwork.central.dras.domain.Location;
 import net.solarnetwork.central.dras.domain.Match;
@@ -36,32 +35,37 @@ import net.solarnetwork.central.dras.domain.Match;
  * Location observer API.
  * 
  * @author matt
- * @version $Revision$
+ * @version 1.1
  */
 public interface LocationBiz {
 
 	/**
 	 * Get a single Location by its ID.
 	 * 
-	 * @param locationId the ID of the location to get
+	 * @param locationId
+	 *        the ID of the location to get
 	 * @return the Location, or <em>null</em> if not found
 	 */
 	Location getLocation(Long locationId);
-	
+
 	/**
-	 * Find a set of Location objects, optionally filtered by a search criteria and optionally
-	 * sorted in some way.
+	 * Find a set of Location objects, optionally filtered by a search criteria
+	 * and optionally sorted in some way.
 	 * 
-	 * <p>If specific ordering is required, the {@code sortDescriptors} parameter
-	 * can be used to sort the results, where sort keys are {@link Location} property names.
-	 * If no {@code sortDescriptors} are provided, the results will be sorted by
-	 * {@code id}, in an ascending manner.</p>
+	 * <p>
+	 * If specific ordering is required, the {@code sortDescriptors} parameter
+	 * can be used to sort the results, where sort keys are {@link Location}
+	 * property names. If no {@code sortDescriptors} are provided, the results
+	 * will be sorted by {@code id}, in an ascending manner.
+	 * </p>
 	 * 
-	 * @param criteria an optional search criteria
-	 * @param sortDescriptors an optional list of sort descriptors to order the results by
+	 * @param criteria
+	 *        an optional search criteria
+	 * @param sortDescriptors
+	 *        an optional list of sort descriptors to order the results by
 	 * @return set of locations, or an empty set if none found
 	 */
-	List<Match> findLocations(ObjectCriteria<LocationFilter> criteria, 
+	List<Match> findLocations(ObjectCriteria<LocationFilter> criteria,
 			List<SortDescriptor> sortDescriptors);
 
 }

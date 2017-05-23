@@ -25,9 +25,8 @@
 package net.solarnetwork.central.dras.biz;
 
 import java.util.List;
-
 import net.solarnetwork.central.dao.ObjectCriteria;
-import net.solarnetwork.central.dao.SortDescriptor;
+import net.solarnetwork.central.domain.SortDescriptor;
 import net.solarnetwork.central.dras.dao.EventFilter;
 import net.solarnetwork.central.dras.domain.Event;
 import net.solarnetwork.central.dras.domain.Match;
@@ -36,14 +35,15 @@ import net.solarnetwork.central.dras.domain.Match;
  * Event observer API.
  * 
  * @author matt
- * @version $Revision$
+ * @version 1.1
  */
 public interface EventBiz {
 
 	/**
 	 * Get a single Event by its ID.
 	 * 
-	 * @param eventId the ID of the event to get
+	 * @param eventId
+	 *        the ID of the event to get
 	 * @return the Event
 	 */
 	Event getEvent(Long eventId);
@@ -51,16 +51,19 @@ public interface EventBiz {
 	/**
 	 * Find events, optionally sorted in some way.
 	 * 
-	 * <p>If specific ordering is required, the {@code sortDescriptors} parameter
-	 * can be used to sort the results, where sort keys are {@link Event} property names.
-	 * If no {@code sortDescriptors} are provided, the results will be sorted by
-	 * {@code id}, in an ascending manner.</p>
+	 * <p>
+	 * If specific ordering is required, the {@code sortDescriptors} parameter
+	 * can be used to sort the results, where sort keys are {@link Event}
+	 * property names. If no {@code sortDescriptors} are provided, the results
+	 * will be sorted by {@code id}, in an ascending manner.
+	 * </p>
 	 * 
-	 * @param criteria an optional search criteria
-	 * @param sortDescriptors an optional list of sort descriptors to order the results by
+	 * @param criteria
+	 *        an optional search criteria
+	 * @param sortDescriptors
+	 *        an optional list of sort descriptors to order the results by
 	 * @return set of events, or an empty set if none found
 	 */
-	List<Match> findEvents(ObjectCriteria<EventFilter> criteria, 
-			List<SortDescriptor> sortDescriptors);
-	
+	List<Match> findEvents(ObjectCriteria<EventFilter> criteria, List<SortDescriptor> sortDescriptors);
+
 }

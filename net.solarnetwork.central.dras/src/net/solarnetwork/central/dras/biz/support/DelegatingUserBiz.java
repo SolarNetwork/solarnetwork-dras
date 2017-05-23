@@ -26,9 +26,8 @@ package net.solarnetwork.central.dras.biz.support;
 
 import java.util.List;
 import java.util.Set;
-
 import net.solarnetwork.central.dao.ObjectCriteria;
-import net.solarnetwork.central.dao.SortDescriptor;
+import net.solarnetwork.central.domain.SortDescriptor;
 import net.solarnetwork.central.dras.biz.UserBiz;
 import net.solarnetwork.central.dras.dao.UserFilter;
 import net.solarnetwork.central.dras.dao.UserGroupFilter;
@@ -43,16 +42,17 @@ import net.solarnetwork.central.dras.support.UserInformation;
  * Delegating {@link UserBiz}, to support AOP with OSGi services.
  * 
  * @author matt
- * @version $Revision$
+ * @version 1.1
  */
 public class DelegatingUserBiz implements UserBiz {
 
-	private UserBiz delegate;
+	private final UserBiz delegate;
 
 	/**
 	 * Construct with delegate.
 	 * 
-	 * @param delegate the delegate
+	 * @param delegate
+	 *        the delegate
 	 */
 	public DelegatingUserBiz(UserBiz delegate) {
 		this.delegate = delegate;

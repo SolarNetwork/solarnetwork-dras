@@ -26,9 +26,8 @@ package net.solarnetwork.central.dras.biz;
 
 import java.util.List;
 import java.util.Set;
-
 import net.solarnetwork.central.dao.ObjectCriteria;
-import net.solarnetwork.central.dao.SortDescriptor;
+import net.solarnetwork.central.domain.SortDescriptor;
 import net.solarnetwork.central.dras.dao.ParticipantFilter;
 import net.solarnetwork.central.dras.dao.ParticipantGroupFilter;
 import net.solarnetwork.central.dras.domain.Constraint;
@@ -42,37 +41,43 @@ import net.solarnetwork.central.dras.support.CapableParticipantGroup;
  * Participant observer API.
  * 
  * @author matt
- * @version $Revision$
+ * @version 1.1
  */
 public interface ParticipantBiz {
 
 	/**
 	 * Find participants, optionally sorted in some way.
 	 * 
-	 * <p>If specific ordering is required, the {@code sortDescriptors} parameter
-	 * can be used to sort the results, where sort keys are {@link Participant} property names.
-	 * If no {@code sortDescriptors} are provided, the results will be sorted by
-	 * {@code id}, in an ascending manner.</p>
+	 * <p>
+	 * If specific ordering is required, the {@code sortDescriptors} parameter
+	 * can be used to sort the results, where sort keys are {@link Participant}
+	 * property names. If no {@code sortDescriptors} are provided, the results
+	 * will be sorted by {@code id}, in an ascending manner.
+	 * </p>
 	 * 
-	 * @param criteria an optional search criteria
-	 * @param sortDescriptors an optional list of sort descriptors to order the results by
+	 * @param criteria
+	 *        an optional search criteria
+	 * @param sortDescriptors
+	 *        an optional list of sort descriptors to order the results by
 	 * @return set of participants, or an empty set if none found
 	 */
-	List<Match> findParticipants(ObjectCriteria<ParticipantFilter> criteria, 
+	List<Match> findParticipants(ObjectCriteria<ParticipantFilter> criteria,
 			List<SortDescriptor> sortDescriptors);
-	
+
 	/**
 	 * Get a single Participant by its ID.
 	 * 
-	 * @param participantId the ID of the participant to get
+	 * @param participantId
+	 *        the ID of the participant to get
 	 * @return the Participant
 	 */
 	Participant getParticipant(Long participantId);
-	
+
 	/**
 	 * Get a single CapableParticipant by its ID.
 	 * 
-	 * @param participantId the participantId
+	 * @param participantId
+	 *        the participantId
 	 * @return the CapableParticipant
 	 */
 	CapableParticipant getCapableParticipant(Long participantId);
@@ -80,22 +85,28 @@ public interface ParticipantBiz {
 	/**
 	 * Find participant groups, optionally sorted in some way.
 	 * 
-	 * <p>If specific ordering is required, the {@code sortDescriptors} parameter
-	 * can be used to sort the results, where sort keys are {@link ParticipantGroup}
-	 * property names. If no {@code sortDescriptors} are provided, the results will be sorted by
-	 * {@code name}, in an ascending manner.</p>
+	 * <p>
+	 * If specific ordering is required, the {@code sortDescriptors} parameter
+	 * can be used to sort the results, where sort keys are
+	 * {@link ParticipantGroup} property names. If no {@code sortDescriptors}
+	 * are provided, the results will be sorted by {@code name}, in an ascending
+	 * manner.
+	 * </p>
 	 * 
-	 * @param criteria an optional search criteria
-	 * @param sortDescriptors an optional list of sort descriptors to order the results by
+	 * @param criteria
+	 *        an optional search criteria
+	 * @param sortDescriptors
+	 *        an optional list of sort descriptors to order the results by
 	 * @return set of participant groups, or an empty set if none found
 	 */
-	List<Match> findParticipantGroups(ObjectCriteria<ParticipantGroupFilter> criteria, 
+	List<Match> findParticipantGroups(ObjectCriteria<ParticipantGroupFilter> criteria,
 			List<SortDescriptor> sortDescriptors);
-	
+
 	/**
 	 * Get a single ParticipantGroup by its ID.
 	 * 
-	 * @param participantGroupId the ID of the participant to get
+	 * @param participantGroupId
+	 *        the ID of the participant to get
 	 * @return the ParticipantGroup
 	 */
 	ParticipantGroup getParticipantGroup(Long participantGroupId);
@@ -103,7 +114,8 @@ public interface ParticipantBiz {
 	/**
 	 * Get a single CapableParticipantGroup by its ID.
 	 * 
-	 * @param participantGroupId the participantId
+	 * @param participantGroupId
+	 *        the participantId
 	 * @return the CapableParticipantGroup
 	 */
 	CapableParticipantGroup getCapableParticipantGroup(Long participantGroupId);
@@ -111,18 +123,19 @@ public interface ParticipantBiz {
 	/**
 	 * Get the complete set of participant constraints.
 	 * 
-	 * @param participantId the participant ID to get the constraints for
+	 * @param participantId
+	 *        the participant ID to get the constraints for
 	 * @return the constraints, never <em>null</em>
 	 */
 	Set<Constraint> getParticipantConstraints(Long participantId);
-	
+
 	/**
 	 * Get the complete set of participant constraints for a specific program.
 	 * 
-	 * @param participantId the user ID to get the constraints for
+	 * @param participantId
+	 *        the user ID to get the constraints for
 	 * @return the constraints, never <em>null</em>
 	 */
-	Set<Constraint> getParticipantProgramConstraints(
-			Long participantId, Long programId);
+	Set<Constraint> getParticipantProgramConstraints(Long participantId, Long programId);
 
 }

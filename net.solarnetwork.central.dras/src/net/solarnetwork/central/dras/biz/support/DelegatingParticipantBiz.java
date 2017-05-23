@@ -26,9 +26,8 @@ package net.solarnetwork.central.dras.biz.support;
 
 import java.util.List;
 import java.util.Set;
-
 import net.solarnetwork.central.dao.ObjectCriteria;
-import net.solarnetwork.central.dao.SortDescriptor;
+import net.solarnetwork.central.domain.SortDescriptor;
 import net.solarnetwork.central.dras.biz.ParticipantBiz;
 import net.solarnetwork.central.dras.dao.ParticipantFilter;
 import net.solarnetwork.central.dras.dao.ParticipantGroupFilter;
@@ -43,24 +42,24 @@ import net.solarnetwork.central.dras.support.CapableParticipantGroup;
  * Delegating {@link ParticipantBiz}, to support AOP with OSGi services.
  * 
  * @author matt
- * @version $Revision$
+ * @version 1.1
  */
 public class DelegatingParticipantBiz implements ParticipantBiz {
 
 	private final ParticipantBiz delegate;
-	
+
 	/**
 	 * Constructor.
 	 * 
-	 * @param delegate the delegate
+	 * @param delegate
+	 *        the delegate
 	 */
 	public DelegatingParticipantBiz(ParticipantBiz delegate) {
 		this.delegate = delegate;
 	}
 
 	@Override
-	public List<Match> findParticipants(
-			ObjectCriteria<ParticipantFilter> criteria,
+	public List<Match> findParticipants(ObjectCriteria<ParticipantFilter> criteria,
 			List<SortDescriptor> sortDescriptors) {
 		return delegate.findParticipants(criteria, sortDescriptors);
 	}
@@ -76,8 +75,7 @@ public class DelegatingParticipantBiz implements ParticipantBiz {
 	}
 
 	@Override
-	public List<Match> findParticipantGroups(
-			ObjectCriteria<ParticipantGroupFilter> criteria,
+	public List<Match> findParticipantGroups(ObjectCriteria<ParticipantGroupFilter> criteria,
 			List<SortDescriptor> sortDescriptors) {
 		return delegate.findParticipantGroups(criteria, sortDescriptors);
 	}
@@ -88,8 +86,7 @@ public class DelegatingParticipantBiz implements ParticipantBiz {
 	}
 
 	@Override
-	public CapableParticipantGroup getCapableParticipantGroup(
-			Long participantGroupId) {
+	public CapableParticipantGroup getCapableParticipantGroup(Long participantGroupId) {
 		return delegate.getCapableParticipantGroup(participantGroupId);
 	}
 
@@ -99,10 +96,8 @@ public class DelegatingParticipantBiz implements ParticipantBiz {
 	}
 
 	@Override
-	public Set<Constraint> getParticipantProgramConstraints(Long participantId,
-			Long programId) {
-		return delegate.getParticipantProgramConstraints(participantId,
-				programId);
+	public Set<Constraint> getParticipantProgramConstraints(Long participantId, Long programId) {
+		return delegate.getParticipantProgramConstraints(participantId, programId);
 	}
-	
+
 }

@@ -26,38 +26,35 @@ package net.solarnetwork.central.dras.support;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.apache.commons.collections.FactoryUtils;
 import org.apache.commons.collections.list.LazyList;
-
-import net.solarnetwork.central.dao.SortDescriptor;
-import net.solarnetwork.central.dao.ObjectCriteria.JoinType;
-import net.solarnetwork.central.dao.ObjectCriteria.MatchType;
 import net.solarnetwork.central.domain.Filter;
+import net.solarnetwork.central.domain.SortDescriptor;
 import net.solarnetwork.central.support.ObjectSearchFilters;
 import net.solarnetwork.central.support.SimpleSortDescriptor;
 
 /**
  * Base criteria object with additional search support.
  * 
- * <p>The use of {@link LazyList} internally has been done with 
- * with using this as a web command object in mind.</p>
+ * <p>
+ * The use of {@link LazyList} internally has been done with with using this as
+ * a web command object in mind.
+ * </p>
  * 
- * @author matt
- * @version $Revision$
+ * @author matt @version1.1
  */
 public class CriteriaSupport<T extends Filter> extends ObjectSearchFilters<T> {
 
 	@SuppressWarnings("unchecked")
-	private List<SortDescriptor> sortDescriptors = 
-		LazyList.decorate(new ArrayList<SortDescriptor>(), 
-		FactoryUtils.instantiateFactory(SimpleSortDescriptor.class));
-	
+	private List<SortDescriptor> sortDescriptors = LazyList.decorate(new ArrayList<SortDescriptor>(),
+			FactoryUtils.instantiateFactory(SimpleSortDescriptor.class));
+
 	/**
-	 * Construct a criteria object out of a single filter, using 
+	 * Construct a criteria object out of a single filter, using
 	 * {@link JoinType#AND} and {@link MatchType#EQUAL}.
 	 * 
-	 * @param filter the object to filter on
+	 * @param filter
+	 *        the object to filter on
 	 */
 	public CriteriaSupport(T filter) {
 		super(filter);
@@ -66,6 +63,7 @@ public class CriteriaSupport<T extends Filter> extends ObjectSearchFilters<T> {
 	public List<SortDescriptor> getSortDescriptors() {
 		return sortDescriptors;
 	}
+
 	public void setSortDescriptors(List<SortDescriptor> sortDescriptors) {
 		this.sortDescriptors = sortDescriptors;
 	}

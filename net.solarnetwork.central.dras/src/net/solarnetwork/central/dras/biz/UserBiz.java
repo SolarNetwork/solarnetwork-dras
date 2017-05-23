@@ -26,9 +26,8 @@ package net.solarnetwork.central.dras.biz;
 
 import java.util.List;
 import java.util.Set;
-
 import net.solarnetwork.central.dao.ObjectCriteria;
-import net.solarnetwork.central.dao.SortDescriptor;
+import net.solarnetwork.central.domain.SortDescriptor;
 import net.solarnetwork.central.dras.dao.UserFilter;
 import net.solarnetwork.central.dras.dao.UserGroupFilter;
 import net.solarnetwork.central.dras.domain.Constraint;
@@ -42,13 +41,13 @@ import net.solarnetwork.central.dras.support.UserInformation;
  * User observer API.
  * 
  * @author matt
- * @version $Revision$
+ * @version 1.1
  */
 public interface UserBiz {
 
 	/** A role that all users are granted. */
 	String DEFAULT_ROLE = "AUTHENTICATED_USER";
-	
+
 	/**
 	 * Get a list of all available user roles.
 	 * 
@@ -59,11 +58,12 @@ public interface UserBiz {
 	/**
 	 * Get a single User by its ID.
 	 * 
-	 * @param userId the ID of the user to get
+	 * @param userId
+	 *        the ID of the user to get
 	 * @return the User, or <em>null</em> if not found
 	 */
 	User getUser(Long userId);
-	
+
 	/**
 	 * Get a list of roles assigned to a user.
 	 * 
@@ -79,57 +79,67 @@ public interface UserBiz {
 	UserInformation getUserInfo(Long userId);
 
 	/**
-	 * Find a set of User objects, optionally filtered by a search criteria and optionally
-	 * sorted in some way.
+	 * Find a set of User objects, optionally filtered by a search criteria and
+	 * optionally sorted in some way.
 	 * 
-	 * <p>If specific ordering is required, the {@code sortDescriptors} parameter
-	 * can be used to sort the results, where sort keys are {@link User} property names.
-	 * If no {@code sortDescriptors} are provided, the results will be sorted by
-	 * {@code username}, in an ascending manner.</p>
+	 * <p>
+	 * If specific ordering is required, the {@code sortDescriptors} parameter
+	 * can be used to sort the results, where sort keys are {@link User}
+	 * property names. If no {@code sortDescriptors} are provided, the results
+	 * will be sorted by {@code username}, in an ascending manner.
+	 * </p>
 	 * 
-	 * @param criteria an optional search criteria
-	 * @param sortDescriptors an optional list of sort descriptors to order the results by
+	 * @param criteria
+	 *        an optional search criteria
+	 * @param sortDescriptors
+	 *        an optional list of sort descriptors to order the results by
 	 * @return set of users, or an empty set if none found
 	 */
-	List<Match> findUsers(ObjectCriteria<UserFilter> criteria, 
-			List<SortDescriptor> sortDescriptors);
-	
+	List<Match> findUsers(ObjectCriteria<UserFilter> criteria, List<SortDescriptor> sortDescriptors);
+
 	/**
 	 * Get a single UserGroup by its ID.
 	 * 
-	 * @param groupId the ID of the group to get
+	 * @param groupId
+	 *        the ID of the group to get
 	 * @return the UserGroup, or <em>null</em> if not found
 	 */
 	UserGroup getUserGroup(Long groupId);
-	
+
 	/**
-	 * Find a set of UserGroup objects, optionally filtered by a search criteria and optionally
-	 * sorted in some way.
+	 * Find a set of UserGroup objects, optionally filtered by a search criteria
+	 * and optionally sorted in some way.
 	 * 
-	 * <p>If specific ordering is required, the {@code sortDescriptors} parameter
-	 * can be used to sort the results, where sort keys are {@link UserGroup} property names.
-	 * If no {@code sortDescriptors} are provided, the results will be sorted by
-	 * {@code name}, in an ascending manner.</p>
+	 * <p>
+	 * If specific ordering is required, the {@code sortDescriptors} parameter
+	 * can be used to sort the results, where sort keys are {@link UserGroup}
+	 * property names. If no {@code sortDescriptors} are provided, the results
+	 * will be sorted by {@code name}, in an ascending manner.
+	 * </p>
 	 * 
-	 * @param criteria an optional search criteria
-	 * @param sortDescriptors an optional list of sort descriptors to order the results by
+	 * @param criteria
+	 *        an optional search criteria
+	 * @param sortDescriptors
+	 *        an optional list of sort descriptors to order the results by
 	 * @return set of groups, or an empty set if none found
 	 */
-	List<Match> findUserGroups(ObjectCriteria<UserGroupFilter> criteria, 
+	List<Match> findUserGroups(ObjectCriteria<UserGroupFilter> criteria,
 			List<SortDescriptor> sortDescriptors);
-	
+
 	/**
 	 * Get the complete set of user constraints.
 	 * 
-	 * @param userId the user ID to get the constraints for
+	 * @param userId
+	 *        the user ID to get the constraints for
 	 * @return the constraints, never <em>null</em>
 	 */
 	Set<Constraint> getUserConstraints(Long userId);
-	
+
 	/**
 	 * Get the complete set of user constraints for a specific program.
 	 * 
-	 * @param userId the user ID to get the constraints for
+	 * @param userId
+	 *        the user ID to get the constraints for
 	 * @return the constraints, never <em>null</em>
 	 */
 	Set<Constraint> getUserProgramConstraints(Long userId, Long programId);
