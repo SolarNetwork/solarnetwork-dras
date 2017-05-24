@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="
+		http://www.osgi.org/xmlns/blueprint/v1.0.0
+		http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd
+		http://www.springframework.org/schema/tx
+		http://www.springframework.org/schema/tx/spring-tx-4.2.xsd">
+
+	<!-- Service References -->
+	
+	<reference id="dataSource" interface="javax.sql.DataSource" filter="(db=central)"/>
+	
+	<reference id="txManager" interface="org.springframework.transaction.PlatformTransactionManager"
+		filter="(db=central)"/>
+	
+	<!-- Published Services -->
+	
+	<service ref="capabilityDao" interface="net.solarnetwork.central.dras.dao.CapabilityDao" ranking="1"/>
+	<service ref="constraintDao" interface="net.solarnetwork.central.dras.dao.ConstraintDao" ranking="1"/>
+	<service ref="effectiveDao" interface="net.solarnetwork.central.dras.dao.EffectiveDao" ranking="1"/>
+	<service ref="eventDao" interface="net.solarnetwork.central.dras.dao.EventDao" ranking="1"/>
+	<service ref="eventExecutionInfoDao" interface="net.solarnetwork.central.dras.dao.EventExecutionInfoDao" ranking="1"/>
+	<service ref="eventRuleDao" interface="net.solarnetwork.central.dras.dao.EventRuleDao" ranking="1"/>
+	<service ref="eventTargetsDao" interface="net.solarnetwork.central.dras.dao.EventTargetsDao" ranking="1"/>
+	<service ref="feeDao" interface="net.solarnetwork.central.dras.dao.FeeDao" ranking="1"/>
+	<service ref="locationDao" interface="net.solarnetwork.central.dras.dao.LocationDao" ranking="1"/>
+	<service ref="outboundMailDao" interface="net.solarnetwork.central.dras.dao.OutboundMailDao" ranking="1"/>
+	<service ref="participantDao" interface="net.solarnetwork.central.dras.dao.ParticipantDao" ranking="1"/>
+	<service ref="participantGroupDao" interface="net.solarnetwork.central.dras.dao.ParticipantGroupDao" ranking="1"/>
+	<service ref="programDao" interface="net.solarnetwork.central.dras.dao.ProgramDao" ranking="1"/>
+	<service ref="userDao" interface="net.solarnetwork.central.dras.dao.UserDao" ranking="1"/>
+	<service ref="userGroupDao" interface="net.solarnetwork.central.dras.dao.UserGroupDao" ranking="1"/>
+
+	<service ref="sqlSessionFactory" interface="org.apache.ibatis.session.SqlSessionFactory">
+		<service-properties>
+			<entry key="db" value="central"/>
+			<entry key="function" value="dras"/>
+		</service-properties>
+	</service>
+
+	<!-- Use Java @Transactional annotations to declare transactions. -->
+	<tx:annotation-driven transaction-manager="txManager"/>
+
+	<bean id="capabilityDao"
+		class="net.solarnetwork.central.dras.dao.mybatis.MyBatisCapabilityDao">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+	</bean>
+		
+	<bean id="constraintDao"
+		class="net.solarnetwork.central.dras.dao.mybatis.MyBatisConstraintDao">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+	</bean>
+	
+	<bean id="effectiveDao"
+		class="net.solarnetwork.central.dras.dao.mybatis.MyBatisEffectiveDao">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+	</bean>
+	
+	<bean id="eventDao"
+		class="net.solarnetwork.central.dras.dao.mybatis.MyBatisEventDao">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+	</bean>
+
+	<bean id="eventExecutionInfoDao"
+		class="net.solarnetwork.central.dras.dao.mybatis.MyBatisEventExecutionInfoDao">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+	</bean>
+	
+	<bean id="eventRuleDao"
+		class="net.solarnetwork.central.dras.dao.mybatis.MyBatisEventRuleDao">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+	</bean>
+	
+	<bean id="eventTargetsDao"
+		class="net.solarnetwork.central.dras.dao.mybatis.MyBatisEventTargetsDao">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+	</bean>
+	
+	<bean id="feeDao"
+		class="net.solarnetwork.central.dras.dao.mybatis.MyBatisFeeDao">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+	</bean>
+	
+	<bean id="locationDao"
+		class="net.solarnetwork.central.dras.dao.mybatis.MyBatisLocationDao">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+	</bean>
+	
+	<bean id="outboundMailDao"
+		class="net.solarnetwork.central.dras.dao.mybatis.MyBatisOutboundMailDao">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+	</bean>
+	
+	<bean id="participantDao"
+		class="net.solarnetwork.central.dras.dao.mybatis.MyBatisParticipantDao">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+	</bean>
+	
+	<bean id="participantGroupDao"
+		class="net.solarnetwork.central.dras.dao.mybatis.MyBatisParticipantGroupDao">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+	</bean>
+	
+	<bean id="programDao"
+		class="net.solarnetwork.central.dras.dao.mybatis.MyBatisProgramDao">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+	</bean>
+	
+	<bean id="userDao"
+		class="net.solarnetwork.central.dras.dao.mybatis.MyBatisUserDao">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+	</bean>
+	
+	<bean id="userGroupDao"
+		class="net.solarnetwork.central.dras.dao.mybatis.MyBatisUserGroupDao">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"/>
+	</bean>
+
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource"/>
+		<property name="typeAliases">
+			<list>
+				<value>net.solarnetwork.central.dras.domain.Capability</value>
+				<value>net.solarnetwork.central.dras.domain.Constraint</value>
+				<value>net.solarnetwork.central.dras.domain.DateTimeWindow</value>
+				<value>net.solarnetwork.central.dras.domain.Effective</value>
+				<value>net.solarnetwork.central.dras.domain.Event</value>
+				<value>net.solarnetwork.central.dras.domain.EventExecutionInfo</value>
+				<value>net.solarnetwork.central.dras.domain.EventRule</value>
+				<value>net.solarnetwork.central.dras.domain.EventTargets</value>
+				<value>net.solarnetwork.central.dras.domain.Fee</value>
+				<value>net.solarnetwork.central.dras.domain.Location</value>
+				<value>net.solarnetwork.central.dras.domain.OutboundMail</value>
+				<value>net.solarnetwork.central.dras.domain.Participant</value>
+				<value>net.solarnetwork.central.dras.domain.ParticipantGroup</value>
+				<value>net.solarnetwork.central.dras.domain.Program</value>
+				<value>net.solarnetwork.central.dras.domain.User</value>
+				<value>net.solarnetwork.central.dras.domain.UserGroup</value>
+			</list>
+		</property>
+		<property name="typeHandlers">
+			<list>
+				<bean class="net.solarnetwork.central.dao.mybatis.type.JodaDateTimeTypeHandler"/>
+				<bean class="net.solarnetwork.central.dao.mybatis.type.JodaLocalDateTimeTypeHandler"/>
+				<bean class="net.solarnetwork.central.dao.mybatis.type.JodaLocalDateTypeHandler"/>
+				<bean class="net.solarnetwork.central.dao.mybatis.type.JodaLocalTimeTypeHandler"/>
+			</list>
+		</property>
+		<property name="mapperLocations">
+			<!-- Note: the order of these elements is significant because of inter-resource includes -->
+			<list>
+				<value>classpath:/net/solarnetwork/central/dras/dao/mybatis/map/Global.xml</value>
+				
+				<value>classpath:/net/solarnetwork/central/dras/dao/mybatis/map/Capability.xml</value>
+				<value>classpath:/net/solarnetwork/central/dras/dao/mybatis/map/Constraint.xml</value>
+				<value>classpath:/net/solarnetwork/central/dras/dao/mybatis/map/Effective.xml</value>
+				<value>classpath:/net/solarnetwork/central/dras/dao/mybatis/map/EventRule.xml</value>
+				<value>classpath:/net/solarnetwork/central/dras/dao/mybatis/map/EventTargets.xml</value>
+				<value>classpath:/net/solarnetwork/central/dras/dao/mybatis/map/Fee.xml</value>
+				<value>classpath:/net/solarnetwork/central/dras/dao/mybatis/map/Location.xml</value>
+				<value>classpath:/net/solarnetwork/central/dras/dao/mybatis/map/OutboundMail.xml</value>
+				<value>classpath:/net/solarnetwork/central/dras/dao/mybatis/map/Participant.xml</value>
+				<value>classpath:/net/solarnetwork/central/dras/dao/mybatis/map/ParticipantGroup.xml</value>
+				<value>classpath:/net/solarnetwork/central/dras/dao/mybatis/map/Program.xml</value>
+				<value>classpath:/net/solarnetwork/central/dras/dao/mybatis/map/User.xml</value>
+				<value>classpath:/net/solarnetwork/central/dras/dao/mybatis/map/UserGroup.xml</value>
+				
+				<value>classpath:/net/solarnetwork/central/dras/dao/mybatis/map/Event.xml</value>
+				<value>classpath:/net/solarnetwork/central/dras/dao/mybatis/map/EventExecutionInfo.xml</value>
+			</list>
+		</property>
+	</bean>
+
+</blueprint>

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/beans
+		http://www.springframework.org/schema/beans/spring-beans-4.2.xsd">
+
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource"/>
+		<property name="typeAliases">
+			<list>
+				<value>net.solarnetwork.central.dras.domain.Capability</value>
+				<value>net.solarnetwork.central.dras.domain.Constraint</value>
+				<value>net.solarnetwork.central.dras.domain.DateTimeWindow</value>
+				<value>net.solarnetwork.central.dras.domain.Effective</value>
+				<value>net.solarnetwork.central.dras.domain.Event</value>
+				<value>net.solarnetwork.central.dras.domain.EventExecutionInfo</value>
+				<value>net.solarnetwork.central.dras.domain.EventRule</value>
+				<value>net.solarnetwork.central.dras.domain.EventTargets</value>
+				<value>net.solarnetwork.central.dras.domain.Fee</value>
+				<value>net.solarnetwork.central.dras.domain.Location</value>
+				<value>net.solarnetwork.central.dras.domain.OutboundMail</value>
+				<value>net.solarnetwork.central.dras.domain.Participant</value>
+				<value>net.solarnetwork.central.dras.domain.ParticipantGroup</value>
+				<value>net.solarnetwork.central.dras.domain.Program</value>
+				<value>net.solarnetwork.central.dras.domain.User</value>
+				<value>net.solarnetwork.central.dras.domain.UserGroup</value>
+			</list>
+		</property>
+		<property name="typeHandlers">
+			<list>
+				<bean class="net.solarnetwork.central.dao.mybatis.type.JodaDateTimeTypeHandler"/>
+				<bean class="net.solarnetwork.central.dao.mybatis.type.JodaLocalDateTimeTypeHandler"/>
+				<bean class="net.solarnetwork.central.dao.mybatis.type.JodaLocalDateTypeHandler"/>
+				<bean class="net.solarnetwork.central.dao.mybatis.type.JodaLocalTimeTypeHandler"/>
+			</list>
+		</property>
+		<property name="mapperLocations">
+			<!-- Note: the order of these elements is significant because of inter-resource includes -->
+			<list>
+				<value>classpath:/net/solarnetwork/central/dras/dao/mybatis/map/Global.xml</value>
+				
+				<value>classpath:/net/solarnetwork/central/dras/dao/mybatis/map/Capability.xml</value>
+				<value>classpath:/net/solarnetwork/central/dras/dao/mybatis/map/Constraint.xml</value>
+				<value>classpath:/net/solarnetwork/central/dras/dao/mybatis/map/Effective.xml</value>
+				<value>classpath:/net/solarnetwork/central/dras/dao/mybatis/map/EventRule.xml</value>
+				<value>classpath:/net/solarnetwork/central/dras/dao/mybatis/map/EventTargets.xml</value>
+				<value>classpath:/net/solarnetwork/central/dras/dao/mybatis/map/Fee.xml</value>
+				<value>classpath:/net/solarnetwork/central/dras/dao/mybatis/map/Location.xml</value>
+				<value>classpath:/net/solarnetwork/central/dras/dao/mybatis/map/OutboundMail.xml</value>
+				<value>classpath:/net/solarnetwork/central/dras/dao/mybatis/map/Participant.xml</value>
+				<value>classpath:/net/solarnetwork/central/dras/dao/mybatis/map/ParticipantGroup.xml</value>
+				<value>classpath:/net/solarnetwork/central/dras/dao/mybatis/map/Program.xml</value>
+				<value>classpath:/net/solarnetwork/central/dras/dao/mybatis/map/User.xml</value>
+				<value>classpath:/net/solarnetwork/central/dras/dao/mybatis/map/UserGroup.xml</value>
+				
+				<value>classpath:/net/solarnetwork/central/dras/dao/mybatis/map/Event.xml</value>
+				<value>classpath:/net/solarnetwork/central/dras/dao/mybatis/map/EventExecutionInfo.xml</value>
+			</list>
+		</property>
+	</bean>
+
+</beans>
