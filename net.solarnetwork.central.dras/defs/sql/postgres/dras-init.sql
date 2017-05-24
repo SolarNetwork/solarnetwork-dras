@@ -1,3 +1,6 @@
+-- NOTE the database, or user connecting to the database, MUST have iso_8601 intervalstyle set;
+-- e.g. ALTER ROLE solartest SET intervalstyle = 'iso_8601';
+
 DROP SCHEMA IF EXISTS solardras CASCADE;
 CREATE SCHEMA solardras;
 
@@ -25,7 +28,7 @@ CREATE TABLE solardras.loc
   id solardras.pk_i,
   created solardras.ts,
   loc_name character varying(128),
-  country character(2),
+  country character varying(2),
   time_zone character varying(64),
   region character varying(128),
   state_prov character varying(128),
@@ -206,150 +209,6 @@ CREATE TABLE solardras.program_user
       REFERENCES solardras.dras_user (id) MATCH SIMPLE
       ON UPDATE NO ACTION ON DELETE NO ACTION,
   CONSTRAINT program_user_effective_fk FOREIGN KEY (eff_id)
-      REFERENCES solardras.effective (id) MATCH SIMPLE
-      ON UPDATE NO ACTION ON DELETE NO ACTION
-);
-
-/* ========================================================================
-   Constraints
-   ======================================================================== */
-
-CREATE TYPE solardras.dras_constraint_filter AS ENUM ('ACCEPT', 'REJECT', 'FORCE', 'RESTRICT');
-
-CREATE TABLE solardras.dras_constraint
-(
-  id solardras.pk_i,
-  event_window_start time without time zone,
-  event_window_end time without time zone,
-  event_window_filter solardras.dras_constraint_filter NOT NULL DEFAULT 'REJECT'::solardras.dras_constraint_filter,
-  max_event_dur interval,
-  max_event_dur_filter solardras.dras_constraint_filter NOT NULL DEFAULT 'REJECT'::solardras.dras_constraint_filter,
-  notif_window_max interval,
-  notif_window_min interval,
-  notif_window_filter solardras.dras_constraint_filter NOT NULL DEFAULT 'REJECT'::solardras.dras_constraint_filter,
-  max_consec_days integer,
-  max_consec_days_filter solardras.dras_constraint_filter NOT NULL DEFAULT 'REJECT'::solardras.dras_constraint_filter,
-  blackout_filter solardras.dras_constraint_filter NOT NULL DEFAULT 'REJECT'::solardras.dras_constraint_filter,
-  valid_filter solardras.dras_constraint_filter NOT NULL DEFAULT 'REJECT'::solardras.dras_constraint_filter,
-  
-  CONSTRAINT dras_constraint_pkey PRIMARY KEY (id),
-  CONSTRAINT dras_constraint_event_window_chk CHECK 
-      (event_window_start < event_window_end),
-  CONSTRAINT dras_constraint_notif_window_chk CHECK 
-      (notif_window_max > notif_window_min)
-);
-
-CREATE TYPE solardras.dtwindow_kind AS ENUM ('VALID', 'BLACKOUT');
-
-CREATE TABLE solardras.dras_constraint_dtwindow
-(
-  con_id solardras.pk_i_ref NOT NULL,
-  kind solardras.dtwindow_kind NOT NULL,
-  idx integer NOT NULL,
-  start_date timestamp with time zone NOT NULL,
-  end_date timestamp with time zone NOT NULL,
-  CONSTRAINT dras_constraint_dtwindow_pkey PRIMARY KEY (con_id, kind, idx),
-  CONSTRAINT dras_constraint_dtwindow_dras_constraint_fk FOREIGN KEY (con_id)
-      REFERENCES solardras.dras_constraint (id) MATCH SIMPLE
-      ON UPDATE NO ACTION ON DELETE NO ACTION,
-  CONSTRAINT dras_constraint_window_chk CHECK 
-      (start_date < end_date)
-);
-
-/* A constraint applied at the program level, as a default for all users within the program. */
-CREATE TABLE solardras.program_constraint
-(
-  pro_id solardras.pk_i_ref NOT NULL,
-  con_id solardras.pk_i_ref NOT NULL,
-  eff_id solardras.pk_i_ref NOT NULL,
-  CONSTRAINT program_constraint_pkey PRIMARY KEY (pro_id, con_id, eff_id),
-  CONSTRAINT program_constraint_program_fk FOREIGN KEY (pro_id)
-      REFERENCES solardras.program (id) MATCH SIMPLE
-      ON UPDATE NO ACTION ON DELETE NO ACTION,
-  CONSTRAINT program_constraint_dras_constraint_fk FOREIGN KEY (con_id)
-      REFERENCES solardras.dras_constraint (id) MATCH SIMPLE
-      ON UPDATE NO ACTION ON DELETE NO ACTION,
-  CONSTRAINT program_constraint_effective_fk FOREIGN KEY (eff_id)
-      REFERENCES solardras.effective (id) MATCH SIMPLE
-      ON UPDATE NO ACTION ON DELETE NO ACTION
-);
-
-/* A constraint for a user, as a default to apply to all programs the user participates in. */
-CREATE TABLE solardras.user_constraint
-(
-  usr_id solardras.pk_i_ref NOT NULL,
-  con_id solardras.pk_i_ref NOT NULL,
-  eff_id solardras.pk_i_ref NOT NULL,
-  CONSTRAINT user_constraint_pkey PRIMARY KEY (usr_id, con_id, eff_id),
-  CONSTRAINT user_constraint_dras_user_fk FOREIGN KEY (usr_id)
-      REFERENCES solardras.dras_user (id) MATCH SIMPLE
-      ON UPDATE NO ACTION ON DELETE NO ACTION,
-  CONSTRAINT user_constraint_dras_constraint_fk FOREIGN KEY (con_id)
-      REFERENCES solardras.dras_constraint (id) MATCH SIMPLE
-      ON UPDATE NO ACTION ON DELETE NO ACTION,
-  CONSTRAINT program_constraint_effective_fk FOREIGN KEY (eff_id)
-      REFERENCES solardras.effective (id) MATCH SIMPLE
-      ON UPDATE NO ACTION ON DELETE NO ACTION
-);
-
-/* A constraint for a specific user in a specific program. */
-CREATE TABLE solardras.user_program_constraint
-(
-  usr_id solardras.pk_i_ref NOT NULL,
-  pro_id solardras.pk_i_ref NOT NULL,
-  con_id solardras.pk_i_ref NOT NULL,
-  eff_id solardras.pk_i_ref NOT NULL,
-  CONSTRAINT user_program_constraint_pkey PRIMARY KEY (usr_id, pro_id, con_id, eff_id),
-  CONSTRAINT user_program_constraint_dras_user_fk FOREIGN KEY (usr_id)
-      REFERENCES solardras.dras_user (id) MATCH SIMPLE
-      ON UPDATE NO ACTION ON DELETE NO ACTION,
-  CONSTRAINT user_program_constraint_program_fk FOREIGN KEY (pro_id)
-      REFERENCES solardras.program (id) MATCH SIMPLE
-      ON UPDATE NO ACTION ON DELETE NO ACTION,
-  CONSTRAINT user_program_constraint_dras_constraint_fk FOREIGN KEY (con_id)
-      REFERENCES solardras.dras_constraint (id) MATCH SIMPLE
-      ON UPDATE NO ACTION ON DELETE NO ACTION,
-  CONSTRAINT user_program_constraint_effective_fk FOREIGN KEY (eff_id)
-      REFERENCES solardras.effective (id) MATCH SIMPLE
-      ON UPDATE NO ACTION ON DELETE NO ACTION
-);
-
-/* A constraint applied at the participant level as a default for all programs. */
-CREATE TABLE solardras.participant_constraint
-(
-  par_id solardras.pk_i_ref NOT NULL,
-  con_id solardras.pk_i_ref NOT NULL,
-  eff_id solardras.pk_i_ref NOT NULL,
-  CONSTRAINT participant_constraint_pkey PRIMARY KEY (par_id, con_id, eff_id),
-  CONSTRAINT participant_constraint_participant_fk FOREIGN KEY (par_id)
-      REFERENCES solardras.participant (id) MATCH SIMPLE
-      ON UPDATE NO ACTION ON DELETE NO ACTION,
-  CONSTRAINT program_constraint_dras_constraint_fk FOREIGN KEY (con_id)
-      REFERENCES solardras.dras_constraint (id) MATCH SIMPLE
-      ON UPDATE NO ACTION ON DELETE NO ACTION,
-  CONSTRAINT program_constraint_effective_fk FOREIGN KEY (eff_id)
-      REFERENCES solardras.effective (id) MATCH SIMPLE
-      ON UPDATE NO ACTION ON DELETE NO ACTION
-);
-
-/* A constraint applied for a specific participant within a specific program. */
-CREATE TABLE solardras.participant_program_constraint
-(
-  par_id solardras.pk_i_ref NOT NULL,
-  pro_id solardras.pk_i_ref NOT NULL,
-  con_id solardras.pk_i_ref NOT NULL,
-  eff_id solardras.pk_i_ref NOT NULL,
-  CONSTRAINT participant_program_constraint_pkey PRIMARY KEY (par_id, pro_id, con_id, eff_id),
-  CONSTRAINT participant_program_constraint_participant_fk FOREIGN KEY (par_id)
-      REFERENCES solardras.participant (id) MATCH SIMPLE
-      ON UPDATE NO ACTION ON DELETE NO ACTION,
-  CONSTRAINT participant_program_constraint_program_fk FOREIGN KEY (pro_id)
-      REFERENCES solardras.program (id) MATCH SIMPLE
-      ON UPDATE NO ACTION ON DELETE NO ACTION,
-  CONSTRAINT program_constraint_dras_constraint_fk FOREIGN KEY (con_id)
-      REFERENCES solardras.dras_constraint (id) MATCH SIMPLE
-      ON UPDATE NO ACTION ON DELETE NO ACTION,
-  CONSTRAINT program_constraint_effective_fk FOREIGN KEY (eff_id)
       REFERENCES solardras.effective (id) MATCH SIMPLE
       ON UPDATE NO ACTION ON DELETE NO ACTION
 );
@@ -979,3 +838,148 @@ create table solardras.outbound_mail
 
 CREATE INDEX outbound_mail_fts_default_idx ON solardras.outbound_mail
 USING gin(fts_default);
+
+
+/* ========================================================================
+   Constraints
+   ======================================================================== */
+
+CREATE TYPE solardras.dras_constraint_filter AS ENUM ('ACCEPT', 'REJECT', 'FORCE', 'RESTRICT');
+
+CREATE TABLE solardras.dras_constraint
+(
+  id solardras.pk_i,
+  event_window_start time without time zone,
+  event_window_end time without time zone,
+  event_window_filter solardras.dras_constraint_filter NOT NULL DEFAULT 'REJECT'::solardras.dras_constraint_filter,
+  max_event_dur interval,
+  max_event_dur_filter solardras.dras_constraint_filter NOT NULL DEFAULT 'REJECT'::solardras.dras_constraint_filter,
+  notif_window_max interval,
+  notif_window_min interval,
+  notif_window_filter solardras.dras_constraint_filter NOT NULL DEFAULT 'REJECT'::solardras.dras_constraint_filter,
+  max_consec_days integer,
+  max_consec_days_filter solardras.dras_constraint_filter NOT NULL DEFAULT 'REJECT'::solardras.dras_constraint_filter,
+  blackout_filter solardras.dras_constraint_filter NOT NULL DEFAULT 'REJECT'::solardras.dras_constraint_filter,
+  valid_filter solardras.dras_constraint_filter NOT NULL DEFAULT 'REJECT'::solardras.dras_constraint_filter,
+  
+  CONSTRAINT dras_constraint_pkey PRIMARY KEY (id),
+  CONSTRAINT dras_constraint_event_window_chk CHECK 
+      (event_window_start < event_window_end),
+  CONSTRAINT dras_constraint_notif_window_chk CHECK 
+      (notif_window_max > notif_window_min)
+);
+
+CREATE TYPE solardras.dtwindow_kind AS ENUM ('VALID', 'BLACKOUT');
+
+CREATE TABLE solardras.dras_constraint_dtwindow
+(
+  con_id solardras.pk_i_ref NOT NULL,
+  kind solardras.dtwindow_kind NOT NULL,
+  idx integer NOT NULL,
+  start_date timestamp with time zone NOT NULL,
+  end_date timestamp with time zone NOT NULL,
+  CONSTRAINT dras_constraint_dtwindow_pkey PRIMARY KEY (con_id, kind, idx),
+  CONSTRAINT dras_constraint_dtwindow_dras_constraint_fk FOREIGN KEY (con_id)
+      REFERENCES solardras.dras_constraint (id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION,
+  CONSTRAINT dras_constraint_window_chk CHECK 
+      (start_date < end_date)
+);
+
+/* A constraint applied at the program level, as a default for all users within the program. */
+CREATE TABLE solardras.program_constraint
+(
+  pro_id solardras.pk_i_ref NOT NULL,
+  con_id solardras.pk_i_ref NOT NULL,
+  eff_id solardras.pk_i_ref NOT NULL,
+  CONSTRAINT program_constraint_pkey PRIMARY KEY (pro_id, con_id, eff_id),
+  CONSTRAINT program_constraint_program_fk FOREIGN KEY (pro_id)
+      REFERENCES solardras.program (id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION,
+  CONSTRAINT program_constraint_dras_constraint_fk FOREIGN KEY (con_id)
+      REFERENCES solardras.dras_constraint (id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION,
+  CONSTRAINT program_constraint_effective_fk FOREIGN KEY (eff_id)
+      REFERENCES solardras.effective (id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION
+);
+
+/* A constraint for a user, as a default to apply to all programs the user participates in. */
+CREATE TABLE solardras.user_constraint
+(
+  usr_id solardras.pk_i_ref NOT NULL,
+  con_id solardras.pk_i_ref NOT NULL,
+  eff_id solardras.pk_i_ref NOT NULL,
+  CONSTRAINT user_constraint_pkey PRIMARY KEY (usr_id, con_id, eff_id),
+  CONSTRAINT user_constraint_dras_user_fk FOREIGN KEY (usr_id)
+      REFERENCES solardras.dras_user (id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION,
+  CONSTRAINT user_constraint_dras_constraint_fk FOREIGN KEY (con_id)
+      REFERENCES solardras.dras_constraint (id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION,
+  CONSTRAINT program_constraint_effective_fk FOREIGN KEY (eff_id)
+      REFERENCES solardras.effective (id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION
+);
+
+/* A constraint for a specific user in a specific program. */
+CREATE TABLE solardras.user_program_constraint
+(
+  usr_id solardras.pk_i_ref NOT NULL,
+  pro_id solardras.pk_i_ref NOT NULL,
+  con_id solardras.pk_i_ref NOT NULL,
+  eff_id solardras.pk_i_ref NOT NULL,
+  CONSTRAINT user_program_constraint_pkey PRIMARY KEY (usr_id, pro_id, con_id, eff_id),
+  CONSTRAINT user_program_constraint_dras_user_fk FOREIGN KEY (usr_id)
+      REFERENCES solardras.dras_user (id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION,
+  CONSTRAINT user_program_constraint_program_fk FOREIGN KEY (pro_id)
+      REFERENCES solardras.program (id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION,
+  CONSTRAINT user_program_constraint_dras_constraint_fk FOREIGN KEY (con_id)
+      REFERENCES solardras.dras_constraint (id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION,
+  CONSTRAINT user_program_constraint_effective_fk FOREIGN KEY (eff_id)
+      REFERENCES solardras.effective (id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION
+);
+
+/* A constraint applied at the participant level as a default for all programs. */
+CREATE TABLE solardras.participant_constraint
+(
+  par_id solardras.pk_i_ref NOT NULL,
+  con_id solardras.pk_i_ref NOT NULL,
+  eff_id solardras.pk_i_ref NOT NULL,
+  CONSTRAINT participant_constraint_pkey PRIMARY KEY (par_id, con_id, eff_id),
+  CONSTRAINT participant_constraint_participant_fk FOREIGN KEY (par_id)
+      REFERENCES solardras.participant (id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION,
+  CONSTRAINT program_constraint_dras_constraint_fk FOREIGN KEY (con_id)
+      REFERENCES solardras.dras_constraint (id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION,
+  CONSTRAINT program_constraint_effective_fk FOREIGN KEY (eff_id)
+      REFERENCES solardras.effective (id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION
+);
+
+/* A constraint applied for a specific participant within a specific program. */
+CREATE TABLE solardras.participant_program_constraint
+(
+  par_id solardras.pk_i_ref NOT NULL,
+  pro_id solardras.pk_i_ref NOT NULL,
+  con_id solardras.pk_i_ref NOT NULL,
+  eff_id solardras.pk_i_ref NOT NULL,
+  CONSTRAINT participant_program_constraint_pkey PRIMARY KEY (par_id, pro_id, con_id, eff_id),
+  CONSTRAINT participant_program_constraint_participant_fk FOREIGN KEY (par_id)
+      REFERENCES solardras.participant (id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION,
+  CONSTRAINT participant_program_constraint_program_fk FOREIGN KEY (pro_id)
+      REFERENCES solardras.program (id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION,
+  CONSTRAINT program_constraint_dras_constraint_fk FOREIGN KEY (con_id)
+      REFERENCES solardras.dras_constraint (id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION,
+  CONSTRAINT program_constraint_effective_fk FOREIGN KEY (eff_id)
+      REFERENCES solardras.effective (id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION
+);

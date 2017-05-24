@@ -18,8 +18,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 
  * 02111-1307 USA
  * ==================================================================
- * $Id$
- * ==================================================================
  */
 
 package net.solarnetwork.central.dras.support;
@@ -35,7 +33,7 @@ import net.solarnetwork.util.SerializeIgnore;
  * Implementation of {@link LocationBoxFilter} and {@link GridLocationFilter}.
  * 
  * @author matt
- * @version $Revision$
+ * @version 1.0
  */
 public class SimpleLocationBoxFilter extends Location
 implements LocationBoxFilter, GridLocationFilter {

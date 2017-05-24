@@ -18,8 +18,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 
  * 02111-1307 USA
  * ==================================================================
- * $Id$
- * ==================================================================
  */
 
 package net.solarnetwork.central.dras.domain;
@@ -33,7 +31,7 @@ import org.joda.time.DateTime;
  * Complete state information for a specific participant in a specific event.
  * 
  * @author matt
- * @version $Revision$
+ * @version 1.0
  */
 public class EventExecutionParticipantState implements Serializable {
 

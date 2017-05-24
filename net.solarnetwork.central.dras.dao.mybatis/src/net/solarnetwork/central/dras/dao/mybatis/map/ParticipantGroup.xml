@@ -1,162 +1,141 @@
-<?xml version="1.0" encoding="UTF-8" ?> 
-<!DOCTYPE sqlMap 
-    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" 
-    "http://ibatis.apache.org/dtd/sql-map-2.dtd"> 
-<sqlMap namespace="ParticipantGroup">
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="net.solarnetwork.central.dras.dao.mybatis.ParticipantGroup">
 	
-	<insert id="insert-ParticipantGroup" parameterClass="ParticipantGroup">
-		<selectKey resultClass="long" keyProperty="id"> 
+	<insert id="insert-ParticipantGroup" parameterType="ParticipantGroup">
+		<selectKey resultType="long" keyProperty="id" order="BEFORE"> 
               SELECT nextval('solardras.solardras_seq') AS id 
 		</selectKey>
 		INSERT INTO solardras.participant_group 
 			(id, creator, loc_id, cap_id, ver_id, confirmed, enabled)
 		VALUES
-			(#id#, #creator#, #locationId#, #capability.id#,
-			#verificationMethodId#, #confirmed#, #enabled#)
+			(#{id}, #{creator}, #{locationId}, #{capability.id},
+			#{verificationMethodId}, #{confirmed}, #{enabled})
 	</insert>
 
-	<update id="update-ParticipantGroup" parameterClass="ParticipantGroup">
+	<update id="update-ParticipantGroup" parameterType="ParticipantGroup">
 		UPDATE solardras.participant_group SET
-			loc_id = #locationId#,
-			cap_id = #capability.id#,
-			ver_id = #verificationMethodId#,
-			confirmed = #confirmed#,
-			enabled = #enabled#
+			loc_id = #{locationId},
+			cap_id = #{capability.id},
+			ver_id = #{verificationMethodId},
+			confirmed = #{confirmed},
+			enabled = #{enabled}
 		WHERE
-			id = #id#
+			id = #{id}
 	</update>
 
-	<resultMap id="ParticipantGroupFullResult" class="ParticipantGroup" groupBy="id">
-		<result column="pgr_id" property="id"/>
+	<resultMap id="ParticipantGroupFullResult" type="ParticipantGroup">
+		<id column="pgr_id" property="id"/>
 		<result column="created" property="created"/>
 		<result column="creator" property="creator"/>
 		<result column="loc_id" property="locationId"/>
 		<result column="ver_id" property="verificationMethodId"/>
 		<result column="confirmed" property="confirmed"/>
 		<result column="enabled" property="enabled"/>
-		<result property="capability" 
-			resultMap="Capability.CapabilityFullResult" 
-			notNullColumn="cap_id"/>
+
+		<association property="capability" notNullColumn="cap_id"
+			resultMap="net.solarnetwork.central.dras.dao.mybatis.Capability.CapabilityFullResult"/>
 	</resultMap>
 	
-	<select id="get-ParticipantGroup-for-id" resultMap="ParticipantGroupFullResult" parameterClass="long">
+	<select id="get-ParticipantGroup-for-id" resultMap="ParticipantGroupFullResult" parameterType="long">
 		SELECT g.id as pgr_id, g.created, g.creator, g.loc_id,
 			g.ver_id, g.confirmed, g.enabled, 
 			c.id as cap_id, c.created, c.dr_kind, c.max_power, c.max_energy, c.max_var, c.contracted_power
 		FROM solardras.participant_group g
 		LEFT OUTER JOIN solardras.capability c ON c.id = g.cap_id
-		WHERE g.id = #id#
+		WHERE g.id = #{id}
 	</select>
 
 	<!--  Capability -->
 
-	<select id="get-ParticipantGroup-Capability" parameterClass="long" resultClass="long">
+	<select id="get-ParticipantGroup-Capability" parameterType="long" resultType="long">
 		SELECT cap_id
 		FROM solardras.participant_group
-		WHERE id = #id#
+		WHERE id = #{id}
 	</select>
 
 	<!-- Filter -->
 
-	<resultMap id="ParticipantGroupFilterResult" class="ParticipantGroup">
-		<result column="id" property="id"/>
+	<resultMap id="ParticipantGroupFilterResult" type="ParticipantGroup">
+		<id column="id" property="id"/>
 		<result column="loc_id" property="locationId"/>
 		<result column="enabled" property="enabled"/>
 	</resultMap>
 	
 	<sql id="fragment-ParticipantGroup-WithFilters">
-		<dynamic prepend="WITH">
-			<isNotNull prepend="," property="filter.programId">
+		<trim prefix="WITH" prefixOverrides=",">
+			<if test="filter.programId != null">
 				<!--  Find participant groups with at least one participant in the given program -->
 				ge AS (
 					SELECT DISTINCT ON (m.pgr_id) m.pgr_id, m.eff_id
 					FROM solardras.participant_group_member m
 					INNER JOIN solardras.effective e ON e.id = m.eff_id
-					WHERE e.effective &lt;= 
-						<isPropertyAvailable property="date">
-							#date,jdbcType=TIMESTAMP#
-						</isPropertyAvailable>
-						<isNotPropertyAvailable property="date">
-							CURRENT_TIMESTAMP
-						</isNotPropertyAvailable>
+					<where>
+						<include refid="net.solarnetwork.central.dras.dao.mybatis.fragment-effective-date-where-lte"/>
+					</where>
 					ORDER BY m.pgr_id, e.effective DESC
 				), pe AS (
 					SELECT DISTINCT ON (m.pro_id) m.pro_id, m.eff_id
 					FROM solardras.program_participant m
 					INNER JOIN solardras.effective e ON e.id = m.eff_id
-					WHERE e.effective &lt;= 
-						<isPropertyAvailable property="date">
-							#date,jdbcType=TIMESTAMP#
-						</isPropertyAvailable>
-						<isNotPropertyAvailable property="date">
-							CURRENT_TIMESTAMP
-						</isNotPropertyAvailable>
-						AND m.pro_id = #filter.programId#
+					WHERE m.pro_id = #{filter.programId}
+						<include refid="net.solarnetwork.central.dras.dao.mybatis.fragment-effective-date-where-lte"/>
 					ORDER BY m.pro_id, e.effective DESC
 				)
-			</isNotNull>
-			<isNotNull prepend="," property="filter.eventId">
-				ee AS (
+			</if>
+			<if test="filter.eventId != null">
+				, ee AS (
 					SELECT DISTINCT ON (m.evt_id) m.evt_id, m.eff_id
 					FROM solardras.program_event_participant_group m
 					INNER JOIN solardras.effective e ON e.id = m.eff_id
-					WHERE e.effective &lt;= 
-						<isPropertyAvailable property="date">
-							#date,jdbcType=TIMESTAMP#
-						</isPropertyAvailable>
-						<isNotPropertyAvailable property="date">
-							CURRENT_TIMESTAMP
-						</isNotPropertyAvailable>
-						AND m.evt_id = #filter.eventId#
+					WHERE m.evt_id = #{filter.eventId}
+						<include refid="net.solarnetwork.central.dras.dao.mybatis.fragment-effective-date-where-lte"/>
 					ORDER BY m.evt_id, e.effective DESC
 				)
-			</isNotNull>
-		</dynamic>
+			</if>
+		</trim>
 	</sql>
 	
 	<sql id="fragment-ParticipantGroup-WhereFilters">
-		<isNotNull property="filter.programId">
+		<if test="filter.programId != null">
 			INNER JOIN solardras.participant_group_member m ON m.pgr_id = g.id
 			INNER JOIN ge ON ge.pgr_id = m.pgr_id AND ge.eff_id = m.eff_id
 			INNER JOIN solardras.program_participant pp ON pp.par_id = m.par_id 
-				AND pp.pro_id = #filter.programId#
+				AND pp.pro_id = #{filter.programId}
 			INNER JOIN pe ON pe.eff_id = pp.eff_id
-		</isNotNull>
-		<isNotNull property="filter.eventId">
+		</if>
+		<if test="filter.eventId != null">
 			INNER JOIN solardras.program_event_participant_group epg ON epg.pgr_id = g.id
-				AND epg.evt_id = #filter.eventId#
+				AND epg.evt_id = #{filter.eventId}
 			INNER JOIN ee ON ee.evt_id = epg.evt_id AND ee.eff_id = epg.eff_id
-		</isNotNull>
-		<dynamic prepend="WHERE">
-			<isPropertyAvailable prepend="AND" property="fts">
-				l.fts_default @@ plainto_tsquery(#fts#)
-			</isPropertyAvailable>
-			<include refid="fragment-LocationBoxFilter"/>
-		</dynamic>
+		</if>
+		<where>
+			<if test="fts != null">
+				l.fts_default @@ plainto_tsquery(#{fts})
+			</if>
+			<include refid="net.solarnetwork.central.dras.dao.mybatis.fragment-LocationBoxFilter"/>
+		</where>
 	</sql>
 	
-	<select id="findall-ParticipantGroup-Match" resultMap="ParticipantGroupFilterResult" parameterClass="map">
+	<select id="findall-ParticipantGroup-Match" resultMap="ParticipantGroupFilterResult" parameterType="map">
 		<include refid="fragment-ParticipantGroup-WithFilters"/>
 		SELECT 
-		<isPropertyAvailable property="hasLocationJoin">
+		<if test="hasLocationJoin != null">
 			DISTINCT ON (g.id)
-		</isPropertyAvailable>
+		</if>
 			g.id, g.loc_id, g.enabled
 		FROM solardras.participant_group g
-		<isPropertyAvailable property="hasLocationJoin">
+		<if test="hasLocationJoin != null">
 			INNER JOIN solardras.loc l ON l.id = g.loc_id
-		</isPropertyAvailable>
+		</if>
 		<include refid="fragment-ParticipantGroup-WhereFilters"/>
 		ORDER BY g.id
 	</select>
 	
 	<resultMap id="ParticipantGroupCapabilityFilterResult" 
-			class="net.solarnetwork.central.dras.support.CapableParticipantGroup">
+			type="net.solarnetwork.central.dras.support.CapableParticipantGroup">
 		<result column="pgr_id" property="participantGroup.id"/>
 		<result column="enabled" property="participantGroup.enabled"/>
-		<result property="capability" 
-			resultMap="Capability.CapabilityFullResult" 
-			notNullColumn="cap_id"/>
 		<result column="loc_id" property="locationEntity.id"/>
 		<result column="loc_name" property="locationEntity.name"/>
 		<result column="country" property="locationEntity.country"/>
@@ -170,10 +149,13 @@
 		<result column="address" property="locationEntity.street"/>
 		<result column="latitude" property="locationEntity.latitude"/>
 		<result column="longitude" property="locationEntity.longitude"/>
+		
+		<association property="capability" notNullColumn="cap_id"
+			resultMap="net.solarnetwork.central.dras.dao.mybatis.Capability.CapabilityFullResult"/>
 	</resultMap>
 	
 	<select id="findall-ParticipantGroup-Match-Capability" 
-		resultMap="ParticipantGroupCapabilityFilterResult" parameterClass="map">
+		resultMap="ParticipantGroupCapabilityFilterResult" parameterType="map">
 		<include refid="fragment-ParticipantGroup-WithFilters"/>
 		SELECT DISTINCT ON (g.id) 
 			g.id as pgr_id, g.enabled, 
@@ -190,78 +172,66 @@
 
 	<!-- Participant -->
 	
-	<resultMap id="ParticipantGroupParticipantResult" class="Participant">
+	<resultMap id="ParticipantGroupParticipantResult" type="Participant">
 		<result column="id" property="id"/>
 		<result column="usr_id" property="userId"/>
 		<result column="loc_id" property="locationId"/>
 	</resultMap>
 
-	<select id="findall-ParticipantGroup-Participant" resultMap="ParticipantGroupParticipantResult" parameterClass="map">
+	<select id="findall-ParticipantGroup-Participant" resultMap="ParticipantGroupParticipantResult" parameterType="map">
 		SELECT p.id, p.usr_id, p.loc_id
 		FROM solardras.participant_group_member m
 		LEFT OUTER JOIN solardras.participant p ON p.id = m.par_id
-		WHERE m.pgr_id = #id#
+		WHERE m.pgr_id = #{id}
 		AND m.eff_id = (
 			SELECT MAX(eff_id)
 			FROM solardras.participant_group_member m
 			INNER JOIN solardras.effective e ON e.id = m.eff_id
-			WHERE m.pgr_id = #id# 
-				AND e.effective &lt;= 
-				<isPropertyAvailable property="date">
-					#date,jdbcType=TIMESTAMP#
-				</isPropertyAvailable>
-				<isNotPropertyAvailable property="date">
-					CURRENT_TIMESTAMP
-				</isNotPropertyAvailable>
+			WHERE m.pgr_id = #{id} 
+				<include refid="net.solarnetwork.central.dras.dao.mybatis.fragment-effective-date-where-lte"/>
 		)
 		ORDER BY p.id
 	</select>
 	
-	<delete id="delete-ParticipantGroup-Participant" parameterClass="map">
+	<delete id="delete-ParticipantGroup-Participant" parameterType="map">
 		DELETE FROM solardras.participant_group_member
-		WHERE pgr_id = #id# AND eff_id = #effectiveId#
+		WHERE pgr_id = #{id} AND eff_id = #{effectiveId}
 	</delete>
 
-	<insert id="insert-ParticipantGroup-Participant" parameterClass="map">
+	<insert id="insert-ParticipantGroup-Participant" parameterType="map">
 		INSERT INTO solardras.participant_group_member
 			(pgr_id, par_id, eff_id)
 		VALUES
-			(#id#, #memberId#, #effectiveId#)
+			(#{id}, #{memberId}, #{effectiveId})
 	</insert>
 
 	<!-- Fee -->
 
-	<select id="findall-ParticipantGroup-Fee" resultMap="Fee.FeeFullResult" parameterClass="map">
+	<select id="findall-ParticipantGroup-Fee" resultMap="net.solarnetwork.central.dras.dao.mybatis.Fee.FeeFullResult" parameterType="map">
 		SELECT 
-		<include refid="fragment-Fee-full-result"/>
+		<include refid="net.solarnetwork.central.dras.dao.mybatis.Fee.fragment-Fee-full-result"/>
 		FROM solardras.fee f
 		INNER JOIN solardras.participant_group_fee m ON m.fee_id = f.id
-		WHERE m.pgr_id = #id#
+		WHERE m.pgr_id = #{id}
 		AND m.eff_id = (
 			SELECT MAX(eff_id)
 			FROM solardras.participant_group_fee m
 			INNER JOIN solardras.effective e ON e.id = m.eff_id
-			WHERE m.pgr_id = #id# 
-				AND e.effective &lt;= 
-				<isPropertyAvailable property="date">
-					#date,jdbcType=TIMESTAMP#
-				</isPropertyAvailable>
-				<isNotPropertyAvailable property="date">
-					CURRENT_TIMESTAMP
-				</isNotPropertyAvailable>
+			WHERE m.pgr_id = #{id} 
+				<include refid="net.solarnetwork.central.dras.dao.mybatis.fragment-effective-date-where-lte"/>
 		)
 	</select>
 	
-	<delete id="delete-ParticipantGroup-Fee" parameterClass="map">
+	<delete id="delete-ParticipantGroup-Fee" parameterType="map">
 		DELETE FROM solardras.participant_group_fee
-		WHERE pgr_id = #id# AND eff_id = #effectiveId#
+		WHERE pgr_id = #{id} AND eff_id = #{effectiveId}
 	</delete>
 
-	<insert id="insert-ParticipantGroup-Fee" parameterClass="map">
+	<insert id="insert-ParticipantGroup-Fee" parameterType="map">
 		INSERT INTO solardras.participant_group_fee
 			(pgr_id, fee_id, eff_id)
 		VALUES
-			(#id#, #memberId#, #effectiveId#)
+			(#{id}, #{memberId}, #{effectiveId})
 	</insert>
 
-</sqlMap>
+</mapper>

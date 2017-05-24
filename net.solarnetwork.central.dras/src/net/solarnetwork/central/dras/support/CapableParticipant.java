@@ -18,8 +18,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 
  * 02111-1307 USA
  * ==================================================================
- * $Id$
- * ==================================================================
  */
 
 package net.solarnetwork.central.dras.support;
@@ -31,7 +29,7 @@ import net.solarnetwork.central.dras.domain.Participant;
  * CapableObject implementation for Participant.
  * 
  * @author matt
- * @version $Revision$
+ * @version 1.0
  */
 public class CapableParticipant extends CapableObject<Participant> {
 

@@ -1,69 +1,67 @@
-<?xml version="1.0" encoding="UTF-8" ?> 
-<!DOCTYPE sqlMap 
-    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" 
-    "http://ibatis.apache.org/dtd/sql-map-2.dtd"> 
-<sqlMap namespace="EventTargets">
-	
-	<typeAlias alias="EventExecutionTargets" 
-		type="net.solarnetwork.central.dras.domain.EventExecutionTargets"/>
-	<typeAlias alias="EventTarget" type="net.solarnetwork.central.dras.domain.EventTarget"/>
-	
-	<insert id="insert-EventTargets" parameterClass="EventTargets">
-		<selectKey resultClass="long" keyProperty="id"> 
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="net.solarnetwork.central.dras.dao.mybatis.EventTargets">
+
+	<insert id="insert-EventTargets" parameterType="EventTargets">
+		<selectKey resultType="long" keyProperty="id" order="BEFORE"> 
               SELECT nextval('solardras.solardras_seq') AS id 
 		</selectKey>
 		INSERT INTO solardras.event_target 
 			(id, evr_id, end_offset)
 		VALUES
-			(#id#, #eventRuleId#, CAST(#overallDuration# AS interval))
+			(#{id}, #{eventRuleId}, CAST(#{overallDuration} AS interval))
 	</insert>
 
-	<update id="update-EventTargets" parameterClass="EventTargets">
+	<update id="update-EventTargets" parameterType="EventTargets">
 		UPDATE solardras.event_target SET
-			evr_id = #eventRuleId#,
-			end_offset = CAST(#overallDuration# AS interval)
+			evr_id = #{eventRuleId},
+			end_offset = CAST(#{overallDuration} AS interval)
 		WHERE
-			id = #id#
+			id = #{id}
 	</update>
 
-	<resultMap id="EventTargetsFullResult" class="EventTargets" groupBy="id">
-		<result column="id" property="id"/>
+	<resultMap id="EventTargetsFullResult" type="EventTargets">
+		<id column="id" property="id"/>
 		<result column="created" property="created"/>
 		<result column="evr_id" property="eventRuleId"/>
 		<result column="end_offset" property="overallDuration"/>
-		<result property="targets" resultMap="EventTargets.EventTargetsEventTargetResult"/>
+		
+		<association property="targets" 
+			resultMap="net.solarnetwork.central.dras.dao.mybatis.EventTargets.EventTargetsEventTargetResult"/>
 	</resultMap>
 	
-	<resultMap id="EventTargetsEventTargetResult" class="EventTarget">
+	<resultMap id="EventTargetsEventTargetResult" type="EventTarget">
 		<result column="event_offset" property="eventDateOffset"/>
 		<result column="target_value" property="value"/>
 	</resultMap>
 	
-	<select id="get-EventTargets-for-id" resultMap="EventTargetsFullResult" parameterClass="long">
+	<select id="get-EventTargets-for-id" resultMap="EventTargetsFullResult" parameterType="long">
 		SELECT t.id, t.created, t.evr_id, CAST(t.end_offset AS text),
 			CAST(v.event_offset AS text), v.target_value
 		FROM solardras.event_target t
 		LEFT OUTER JOIN solardras.event_target_value v ON v.eta_id = t.id
-		WHERE t.id = #id#
+		WHERE t.id = #{id}
 	</select>
 
-	<delete id="delete-EventTargets-EventTarget" parameterClass="map">
+	<delete id="delete-EventTargets-EventTarget" parameterType="map">
 		DELETE FROM solardras.event_target_value
-		WHERE eta_id = #id#
+		WHERE eta_id = #{id}
 	</delete>
 
-	<insert id="insert-EventTargets-EventTarget" parameterClass="map">
+	<insert id="insert-EventTargets-EventTarget" parameterType="map">
 		INSERT INTO solardras.event_target_value
 			(eta_id, event_offset, target_value)
 		VALUES
-			(#id#, CAST(#memberId.eventDateOffset# AS interval), #memberId.value#)
+			(#{id}, CAST(#{memberId.eventDateOffset} AS interval), #{memberId.value})
 	</insert>
 
-	<resultMap id="EventExecutionTargetsFullResult" class="EventExecutionTargets" groupBy="id">
-		<result column="id" property="id"/>
+	<resultMap id="EventExecutionTargetsFullResult" type="EventExecutionTargets">
+		<id column="id" property="id"/>
 		<result column="rule_kind" property="eventRuleKind"/>
 		<result column="rule_name" property="eventRuleName"/>
-		<result property="targets" resultMap="EventTargets.EventTargetsEventTargetResult"/>
+
+		<association property="targets" 
+			resultMap="net.solarnetwork.central.dras.dao.mybatis.EventTargets.EventTargetsEventTargetResult"/>
 	</resultMap>
 	
-</sqlMap>
+</mapper>

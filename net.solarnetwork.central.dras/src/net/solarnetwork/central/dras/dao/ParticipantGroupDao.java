@@ -18,8 +18,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 
  * 02111-1307 USA
  * ==================================================================
- * $Id$
- * ==================================================================
  */
 
 package net.solarnetwork.central.dras.dao;
@@ -39,7 +37,7 @@ import org.joda.time.DateTime;
  * DAO API for ParticipantGroup entities.
  * 
  * @author matt
- * @version $Revision$
+ * @version 1.0
  */
 public interface ParticipantGroupDao extends GenericDao<ParticipantGroup, Long>,
 FilterableDao<Match, Long, ParticipantGroupFilter> {

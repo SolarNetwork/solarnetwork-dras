@@ -18,8 +18,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 
  * 02111-1307 USA
  * ==================================================================
- * $Id$
- * ==================================================================
  */
 
 package net.solarnetwork.central.dras.biz;
@@ -30,7 +28,7 @@ import net.solarnetwork.central.dras.domain.Location;
  * Location administrator API.
  * 
  * @author matt
- * @version $Revision$
+ * @version 1.0
  */
 public interface LocationAdminBiz {
 

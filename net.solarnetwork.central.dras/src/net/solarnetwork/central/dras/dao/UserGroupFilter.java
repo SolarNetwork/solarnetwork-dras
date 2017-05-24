@@ -18,8 +18,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 
  * 02111-1307 USA
  * ==================================================================
- * $Id$
- * ==================================================================
  */
 
 package net.solarnetwork.central.dras.dao;
@@ -29,7 +27,7 @@ package net.solarnetwork.central.dras.dao;
  * Filter for UserGroup.
  * 
  * @author matt
- * @version $Revision$
+ * @version 1.0
  */
 public interface UserGroupFilter extends LocationBoxFilter {
 

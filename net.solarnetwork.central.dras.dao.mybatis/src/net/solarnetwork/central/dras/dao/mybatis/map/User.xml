@@ -1,155 +1,152 @@
-<?xml version="1.0" encoding="UTF-8" ?> 
-<!DOCTYPE sqlMap 
-    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" 
-    "http://ibatis.apache.org/dtd/sql-map-2.dtd"> 
-<sqlMap namespace="User">
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="net.solarnetwork.central.dras.dao.mybatis.User">
 	
-	<typeAlias alias="UserContact" type="net.solarnetwork.central.dras.domain.UserContact"/>
-	<typeAlias alias="UserRole" type="net.solarnetwork.central.dras.domain.UserRole"/>
-	
-	<insert id="insert-User" parameterClass="User">
-		<selectKey resultClass="long" keyProperty="id"> 
+	<insert id="insert-User" parameterType="User">
+		<selectKey resultType="long" keyProperty="id" order="BEFORE"> 
               SELECT nextval('solardras.solardras_seq') AS id 
 		</selectKey>
 		INSERT INTO solardras.dras_user 
 			(id, username, passwd, disp_name, address, vendor, enabled)
 		VALUES
-			(#id#, #username#, #password#, #displayName#, 
-			#address,jdbcType=ARRAY#, 
-			#vendor#, #enabled#)
+			(#{id}, #{username}, #{password}, #{displayName}, 
+			#{address,jdbcType=ARRAY,typeHandler=net.solarnetwork.central.dao.mybatis.type.TextArrayTypeHandler}, 
+			#{vendor}, #{enabled})
 	</insert>
 
-	<update id="update-User" parameterClass="User">
+	<update id="update-User" parameterType="User">
 		UPDATE solardras.dras_user SET
-			username = #username#,
-			passwd = #password#, 
-			disp_name = #displayName#, 
-			address = #address,jdbcType=ARRAY#,
-			vendor = #vendor#,
-			enabled = #enabled#
+			username = #{username},
+			passwd = #{password}, 
+			disp_name = #{displayName}, 
+			address = #{address,jdbcType=ARRAY,typeHandler=net.solarnetwork.central.dao.mybatis.type.TextArrayTypeHandler},
+			vendor = #{vendor},
+			enabled = #{enabled}
 		WHERE
-			id = #id#
+			id = #{id}
 			AND id &lt;&gt;0
 	</update>
 
-	<resultMap id="UserFullResult" class="User" groupBy="id">
-		<result column="id" property="id"/>
+	<resultMap id="UserFullResult" type="User">
+		<id column="id" property="id"/>
 		<result column="created" property="created"/>
 		<result column="username" property="username"/>
 		<result column="passwd" property="password"/>
 		<result column="disp_name" property="displayName"/>
-		<result column="address" property="address" jdbcType="ARRAY"/>
+		<result column="address" property="address" jdbcType="ARRAY" typeHandler="net.solarnetwork.central.dao.mybatis.type.TextArrayTypeHandler"/>
 		<result column="vendor" property="vendor"/>
 		<result column="enabled" property="enabled"/>
-		<result property="contactInfo" resultMap="User.UserContactFullResult"/>
+		<association property="contactInfo" 
+			resultMap="net.solarnetwork.central.dras.dao.mybatis.User.UserContactFullResult"/>
 	</resultMap>
 	
-	<select id="get-User-for-id" resultMap="UserFullResult" parameterClass="long">
+	<select id="get-User-for-id" resultMap="UserFullResult" parameterType="long">
 		SELECT u.*, c.kind, c.contact, c.priority
 		FROM solardras.dras_user u
 		LEFT OUTER JOIN solardras.dras_user_contact c ON c.usr_id = u.id
-		WHERE u.id = #id#
+		WHERE u.id = #{id}
 		ORDER BY c.idx
 	</select>
 	
-	<resultMap id="UserFilterRoleResult" class="string">
+	<resultMap id="UserFilterRoleResult" type="string">
 		<result column="rolename" property="roleNames"/>
 	</resultMap>
 	
-	<resultMap id="UserFilterResult" class="User" groupBy="id">
-		<result column="id" property="id"/>
+	<resultMap id="UserFilterResult" type="User">
+		<id column="id" property="id"/>
 		<result column="username" property="username"/>
 		<result column="disp_name" property="displayName"/>
 		<result column="enabled" property="enabled"/>
-		<result property="roleNames" resultMap="User.UserFilterRoleResult"/>
+		<association property="roleNames" 
+			resultMap="net.solarnetwork.central.dras.dao.mybatis.User.UserFilterRoleResult"/>
 	</resultMap>
 	
-	<select id="findall-User-Match" resultMap="UserFilterResult" parameterClass="map">
+	<select id="findall-User-Match" resultMap="UserFilterResult" parameterType="map">
 		SELECT 
-		<isPropertyAvailable property="hasJoin">
+		<if test="hasJoin != null">
 			DISTINCT ON (u.username, r.rolename)
-		</isPropertyAvailable>
+		</if>
 		u.id, u.username, u.disp_name, u.enabled, r.rolename
 		FROM solardras.dras_user u
-		<isPropertyAvailable property="hasUserGroupJoin">
+		<if test="hasUserGroupJoin != null">
 			INNER JOIN solardras.dras_user_group_member m ON m.usr_id = u.id
-		</isPropertyAvailable>
-		<isEqual property="filter.box" compareValue="true">
+		</if>
+		<if test="filter.box == true">
 			INNER JOIN solardras.dras_user_group g ON g.id = m.ugr_id
 			INNER JOIN solardras.loc l ON l.id = g.loc_id
-		</isEqual>
+		</if>
 		LEFT OUTER JOIN solardras.dras_user_role r ON r.usr_id = u.id
 		WHERE u.id &lt;&gt; 0
-		<dynamic prepend="AND">
-			<isPropertyAvailable prepend="AND" property="fts">
-				fts_default @@ plainto_tsquery(#fts#)
-			</isPropertyAvailable>
-			<isNotNull prepend="AND" property="filter.uniqueId">
-				u.username = #filter.uniqueId#
-			</isNotNull>
-			<isNotNull prepend="AND" property="filter.userId">
-				u.id = #filter.userId#
-			</isNotNull>
-			<isNotNull prepend="AND" property="filter.enabled">
-				u.enabled = #filter.enabled#
-			</isNotNull>
-			<include refid="fragment-LocationBoxFilter"/>
-			<isNotEmpty prepend="AND" property="filter.roles">
-				<iterate open="(" close=")" conjunction="OR" property="filter.roles">
-					r.rolename = #filter.roles[]#
-				</iterate>
-			</isNotEmpty>
-			<isNotEmpty prepend="AND" property="filter.userGroups">
-				<iterate open="(" close=")" conjunction="OR" property="filter.userGroups">
-					m.ugr_id = #filter.userGroups[]#
-				</iterate>
-			</isNotEmpty>
-		</dynamic>
+		<if test="fts != null">
+			AND fts_default @@ plainto_tsquery(#{fts})
+		</if>
+		<if test="filter.uniqueId != null">
+			AND u.username = #{filter.uniqueId}
+		</if>
+		<if test="filter.userId != null">
+			AND u.id = #{filter.userId}
+		</if>
+		<if test="filter.enabled != null">
+			AND u.enabled = #{filter.enabled}
+		</if>
+		<include refid="net.solarnetwork.central.dras.dao.mybatis.fragment-LocationBoxFilter"/>
+		<if test="filter.roles != null">
+			AND
+			<foreach collection="filter.roles" open="(" close=")" item="item" separator="OR">
+				r.rolename = #{item}
+			</foreach>
+		</if>
+		<if test="filter.userGroups != null">
+			AND
+			<foreach collection="filter.userGroups" open="(" close=")" item="item" separator="OR">
+				m.ugr_id = #{item}
+			</foreach>
+		</if>
 		ORDER BY u.username, r.rolename
 	</select>
 	
 	<!-- UserContact support -->
 	
-	<resultMap id="UserContactFullResult" class="UserContact">
+	<resultMap id="UserContactFullResult" type="UserContact">
 		<result column="kind" property="kind"/>
 		<result column="contact" property="contact"/>
 		<result column="priority" property="priority"/>
 	</resultMap>
 
-	<select id="findall-User-UserContact" resultMap="UserContactFullResult" parameterClass="long">
+	<select id="findall-User-UserContact" resultMap="UserContactFullResult" parameterType="long">
 		SELECT kind, contact, priority
 		FROM solardras.dras_user_contact
-		WHERE usr_id = #id#
+		WHERE usr_id = #{id}
 		ORDER BY idx
 	</select>
 	
-	<delete id="delete-User-UserContact" parameterClass="map">
+	<delete id="delete-User-UserContact" parameterType="map">
 		DELETE FROM solardras.dras_user_contact
-		WHERE usr_id = #id#
-		<isPropertyAvailable property="index">
-			AND idx = #index#
-		</isPropertyAvailable>
+		WHERE usr_id = #{id}
+		<if test="index != null">
+			AND idx = #{index}
+		</if>
 	</delete>
 
-	<insert id="insert-User-UserContact" parameterClass="map">
+	<insert id="insert-User-UserContact" parameterType="map">
 		INSERT INTO solardras.dras_user_contact
 			(usr_id, idx, kind, contact, priority)
 		VALUES
-			(#id#, #index#, #obj.kind#::solardras.contact_kind, #obj.contact#, #obj.priority#)
+			(#{id}, #{index}, #{obj.kind}::solardras.contact_kind, #{obj.contact}, #{obj.priority})
 	</insert>
 
-	<update id="update-User-UserContact" parameterClass="map">
+	<update id="update-User-UserContact" parameterType="map">
 		UPDATE solardras.dras_user_contact
-		SET kind = #obj.kind#::solardras.contact_kind, 
-			contact = #obj.contact#,
-			priority = #obj.priority#
-		WHERE usr_id = #id# AND idx = #index#
+		SET kind = #{obj.kind}::solardras.contact_kind, 
+			contact = #{obj.contact},
+			priority = #{obj.priority}
+		WHERE usr_id = #{id} AND idx = #{index}
 	</update>
 
 	<!-- UserRole support -->
 
-	<resultMap id="UserRoleFullResult" class="UserRole">
-		<result column="rolename" property="id"/>
+	<resultMap id="UserRoleFullResult" type="UserRole">
+		<id column="rolename" property="id"/>
 		<result column="description" property="description"/>
 	</resultMap>
 
@@ -159,140 +156,136 @@
 		ORDER BY r.rolename
 	</select>
 		
-	<select id="findall-User-UserRole" resultMap="UserRoleFullResult" parameterClass="map">
+	<select id="findall-User-UserRole" resultMap="UserRoleFullResult" parameterType="map">
 		SELECT r.rolename, r.description
 		FROM solardras.dras_user_role u
 		INNER JOIN solardras.dras_role r ON r.rolename = u.rolename
-		WHERE u.usr_id = #id#
+		WHERE u.usr_id = #{id}
 		ORDER BY r.rolename
 	</select>
 	
-	<delete id="delete-User-UserRole" parameterClass="map">
+	<delete id="delete-User-UserRole" parameterType="map">
 		DELETE FROM solardras.dras_user_role
-		WHERE usr_id = #id#
-		<isPropertyAvailable property="key">
-			AND rolename = #memberId#
-		</isPropertyAvailable>
+		WHERE usr_id = #{id}
+		<if test="key != null">
+			AND rolename = #{memberId}
+		</if>
 	</delete>
 
-	<insert id="insert-User-UserRole" parameterClass="map">
+	<insert id="insert-User-UserRole" parameterType="map">
 		INSERT INTO solardras.dras_user_role
 			(usr_id, rolename)
 		VALUES
-			(#id#, #memberId#)
+			(#{id}, #{memberId})
 	</insert>
 
 	<!-- Constraint support -->
 
-	<select id="findall-User-Constraint" resultMap="Constraint.ConstraintFullResult" parameterClass="map">
+	<select id="findall-User-Constraint" resultMap="net.solarnetwork.central.dras.dao.mybatis.Constraint.ConstraintFullResult" parameterType="map">
 		SELECT 
-		<include refid="fragment-Constraint-full-result"/>
-		<isPropertyAvailable property="programId">
-			FROM solardras.user_program_constraint m
-		</isPropertyAvailable>
-		<isNotPropertyAvailable property="programId">
-			FROM solardras.user_constraint m
-		</isNotPropertyAvailable>
+		<include refid="net.solarnetwork.central.dras.dao.mybatis.Constraint.fragment-Constraint-full-result"/>
+		<choose>
+			<when test="programId != null">
+				FROM solardras.user_program_constraint m
+			</when>
+			<otherwise>
+				FROM solardras.user_constraint m
+			</otherwise>
+		</choose>
 		INNER JOIN solardras.dras_constraint c ON c.id = m.con_id
 		LEFT OUTER JOIN solardras.dras_constraint_dtwindow cwin ON cwin.con_id = c.id
-		WHERE m.usr_id = #id#
-			<isPropertyAvailable property="programId">
-				AND m.pro_id = #programId#
-			</isPropertyAvailable>
+		WHERE m.usr_id = #{id}
+			<if test="programId != null">
+				AND m.pro_id = #{programId}
+			</if>
 			AND m.eff_id = (
 				SELECT MAX(eff_id)
-				<isPropertyAvailable property="programId">
-					FROM solardras.user_program_constraint m
-				</isPropertyAvailable>
-				<isNotPropertyAvailable property="programId">
-					FROM solardras.user_constraint m
-				</isNotPropertyAvailable>
+				<choose>
+					<when test="programId != null">
+						FROM solardras.user_program_constraint m
+					</when>
+					<otherwise>
+						FROM solardras.user_constraint m
+					</otherwise>
+				</choose>
 				INNER JOIN solardras.effective e ON e.id = m.eff_id
-				WHERE m.usr_id = #id# 
-					<isPropertyAvailable property="programId">
-						AND m.pro_id = #programId#
-					</isPropertyAvailable>
-					AND e.effective &lt;= 
-					<isPropertyAvailable property="date">
-						#date,jdbcType=TIMESTAMP#
-					</isPropertyAvailable>
-					<isNotPropertyAvailable property="date">
-						CURRENT_TIMESTAMP
-					</isNotPropertyAvailable>
+				WHERE m.usr_id = #{id} 
+					<if test="programId != null">
+						AND m.pro_id = #{programId}
+					</if>
+					<include refid="net.solarnetwork.central.dras.dao.mybatis.fragment-effective-date-where-lte"/>
 			)
 		ORDER BY c.id, cwin.idx
 	</select>
 	
-	<delete id="delete-User-Constraint" parameterClass="map">
-		DELETE
-		<isPropertyAvailable property="programId">
-			FROM solardras.user_program_constraint
-		</isPropertyAvailable>
-		<isNotPropertyAvailable property="programId">
-			FROM solardras.user_constraint
-		</isNotPropertyAvailable>
+	<delete id="delete-User-Constraint" parameterType="map">
+		DELETE FROM
+		<choose>
+			<when test="programId != null">
+				solardras.user_program_constraint
+			</when>
+			<otherwise>
+				solardras.user_constraint
+			</otherwise>
+		</choose>
 		WHERE 
-			usr_id = #id# 
-			<isPropertyAvailable property="programId">
-				AND pro_id = #programId#
-			</isPropertyAvailable>
-			AND eff_id = #effectiveId#
+			usr_id = #{id} 
+			<if test="programId != null">
+				AND pro_id = #{programId}
+			</if>
+			AND eff_id = #{effectiveId}
 	</delete>
 
-	<insert id="insert-User-Constraint" parameterClass="map">
+	<insert id="insert-User-Constraint" parameterType="map">
 		INSERT INTO 
-		<isPropertyAvailable property="programId">
-			solardras.user_program_constraint
-		</isPropertyAvailable>
-		<isNotPropertyAvailable property="programId">
-			solardras.user_constraint
-		</isNotPropertyAvailable>
+		<choose>
+			<when test="programId != null">
+				solardras.user_program_constraint
+			</when>
+			<otherwise>
+				solardras.user_constraint
+			</otherwise>
+		</choose>
 			(usr_id, 
-			<isPropertyAvailable property="programId">
+			<if test="programId != null">
 				pro_id,
-			</isPropertyAvailable>
+			</if>
 			con_id, eff_id)
 		VALUES
-			(#id#,
-			<isPropertyAvailable property="programId">
-				#programId#,
-			</isPropertyAvailable>
-			#memberId#, #effectiveId#)
+			(#{id},
+			<if test="programId != null">
+				#{programId},
+			</if>
+			#{memberId}, #{effectiveId})
 	</insert>
 
 	<!-- Fee -->
 
-	<select id="findall-User-Fee" resultMap="Fee.FeeFullResult" parameterClass="map">
+	<select id="findall-User-Fee" resultMap="net.solarnetwork.central.dras.dao.mybatis.Fee.FeeFullResult" parameterType="map">
 		SELECT 
-		<include refid="fragment-Fee-full-result"/>
+		<include refid="net.solarnetwork.central.dras.dao.mybatis.Fee.fragment-Fee-full-result"/>
 		FROM solardras.fee f
 		INNER JOIN solardras.user_fee m ON m.fee_id = f.id
-		WHERE m.usr_id = #id#
+		WHERE m.usr_id = #{id}
 		AND m.eff_id = (
 			SELECT MAX(eff_id)
 			FROM solardras.user_fee m
 			INNER JOIN solardras.effective e ON e.id = m.eff_id
-			WHERE m.usr_id = #id# 
-				AND e.effective &lt;= 
-				<isPropertyAvailable property="date">
-					#date,jdbcType=TIMESTAMP#
-				</isPropertyAvailable>
-				<isNotPropertyAvailable property="date">
-					CURRENT_TIMESTAMP
-				</isNotPropertyAvailable>
+			WHERE m.usr_id = #{id} 
+				<include refid="net.solarnetwork.central.dras.dao.mybatis.fragment-effective-date-where-lte"/>
 		)
 	</select>
 	
-	<delete id="delete-User-Fee" parameterClass="map">
+	<delete id="delete-User-Fee" parameterType="map">
 		DELETE FROM solardras.user_fee
-		WHERE usr_id = #id# AND eff_id = #effectiveId#
+		WHERE usr_id = #{id} AND eff_id = #{effectiveId}
 	</delete>
 
-	<insert id="insert-User-Fee" parameterClass="map">
+	<insert id="insert-User-Fee" parameterType="map">
 		INSERT INTO solardras.user_fee
 			(usr_id, fee_id, eff_id)
 		VALUES
-			(#id#, #memberId#, #effectiveId#)
+			(#{id}, #{memberId}, #{effectiveId})
 	</insert>
 
-</sqlMap>
+</mapper>

@@ -1,42 +1,40 @@
-<?xml version="1.0" encoding="UTF-8" ?> 
-<!DOCTYPE sqlMap 
-    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" 
-    "http://ibatis.apache.org/dtd/sql-map-2.dtd"> 
-<sqlMap namespace="Location">
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="net.solarnetwork.central.dras.dao.mybatis.Location">
 	
-	<insert id="insert-Location" parameterClass="Location">
-		<selectKey resultClass="long" keyProperty="id"> 
+	<insert id="insert-Location" parameterType="Location">
+		<selectKey resultType="long" keyProperty="id" order="BEFORE"> 
               SELECT nextval('solardras.solardras_seq') AS id 
 		</selectKey>
 		INSERT INTO solardras.loc 
 			(id, loc_name, country, time_zone, region, state_prov, locality,
 			postal_code, gxp, icp, address, latitude, longitude)
 		VALUES
-			(#id#, #name#, #country#, #timeZoneId#, #region#, #stateOrProvince#,
-			#locality#, #postalCode#, #gxp#, #icp#, #street#, #latitude#,
-			#longitude#)
+			(#{id}, #{name}, #{country}, #{timeZoneId}, #{region}, #{stateOrProvince},
+			#{locality}, #{postalCode}, #{gxp}, #{icp}, #{street}, #{latitude},
+			#{longitude})
 	</insert>
 
-	<update id="update-Location" parameterClass="Location">
+	<update id="update-Location" parameterType="Location">
 		UPDATE solardras.loc SET
-			loc_name = #name#, 
-			country = #country#, 
-			time_zone = #timeZoneId#, 
-			region = #region#,
-			state_prov = #stateOrProvince#,
-			locality = #locality#,
-			postal_code = #postalCode#, 
-			gxp = #gxp#, 
-			icp = #icp#, 
-			address = #street#, 
-			latitude = #latitude#,
-			longitude = #longitude#
+			loc_name = #{name}, 
+			country = #{country}, 
+			time_zone = #{timeZoneId}, 
+			region = #{region},
+			state_prov = #{stateOrProvince},
+			locality = #{locality},
+			postal_code = #{postalCode}, 
+			gxp = #{gxp}, 
+			icp = #{icp}, 
+			address = #{street}, 
+			latitude = #{latitude},
+			longitude = #{longitude}
 		WHERE
-			id = #id#
+			id = #{id}
 	</update>
 
-	<resultMap id="LocationFullResult" class="Location">
-		<result column="id" property="id"/>
+	<resultMap id="LocationFullResult" type="Location">
+		<id column="id" property="id"/>
 		<result column="created" property="created"/>
 		<result column="loc_name" property="name"/>
 		<result column="country" property="country"/>
@@ -52,16 +50,16 @@
 		<result column="longitude" property="longitude"/>
 	</resultMap>
 	
-	<select id="get-Location-for-id" resultMap="LocationFullResult" parameterClass="long">
+	<select id="get-Location-for-id" resultMap="LocationFullResult" parameterType="long">
 		SELECT id, created, loc_name, country, time_zone, region,
 			state_prov, locality, postal_code, gxp, icp, address,
 			latitude, longitude
 		FROM solardras.loc
-		WHERE id = #id#
+		WHERE id = #{id}
 	</select>
 
-	<resultMap id="LocationFilterResult" class="Location">
-		<result column="id" property="id"/>
+	<resultMap id="LocationFilterResult" type="Location">
+		<id column="id" property="id"/>
 		<result column="loc_name" property="name"/>
 		<result column="postal_code" property="postalCode"/>
 		<result column="gxp" property="gxp"/>
@@ -71,22 +69,20 @@
 		<result column="longitude" property="longitude"/>
 	</resultMap>
 	
-	<select id="findall-Location-Match" resultMap="LocationFilterResult" parameterClass="map">
+	<select id="findall-Location-Match" resultMap="LocationFilterResult" parameterType="map">
 		SELECT l.id, l.loc_name, l.postal_code, l.gxp, l.icp, l.address, l.latitude, l.longitude
 		FROM solardras.loc l
-		<dynamic prepend="WHERE">
+		<where>
 			<!--  TODO: FTS on name -->
-			<isNotEmpty prepend="AND" property="filter.name">
-			l.loc_name = #filter.name#
-			</isNotEmpty>
-			<isNotEmpty prepend="AND" property="filter.ids">
-				<iterate open="l.id IN (" close=")" conjunction="," property="filter.ids">
-					#filter.ids[]#
-				</iterate>
-			</isNotEmpty>
-			<include refid="fragment-LocationBoxFilter"/>
-		</dynamic>
+			<if test="filter.name != null">l.loc_name = #{filter.name}</if>
+			<if test="filter.ids != null">
+				AND l.id IN
+				<foreach item="item" collection="filter.ids"
+					open="(" separator="," close=")">#{item}</foreach>
+			</if>
+			<include refid="net.solarnetwork.central.dras.dao.mybatis.fragment-LocationBoxFilter"/>
+		</where>
 		ORDER BY l.id
 	</select>
 	
-</sqlMap>
+</mapper>

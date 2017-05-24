@@ -1,36 +1,34 @@
-<?xml version="1.0" encoding="UTF-8" ?> 
-<!DOCTYPE sqlMap 
-    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" 
-    "http://ibatis.apache.org/dtd/sql-map-2.dtd"> 
-<sqlMap namespace="Fee">
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="net.solarnetwork.central.dras.dao.mybatis.Fee">
 	
-	<insert id="insert-Fee" parameterClass="Fee">
-		<selectKey resultClass="long" keyProperty="id"> 
+	<insert id="insert-Fee" parameterType="Fee">
+		<selectKey resultType="long" keyProperty="id" order="BEFORE"> 
               SELECT nextval('solardras.solardras_seq') AS id 
 		</selectKey>
 		INSERT INTO solardras.fee 
 			(id, currency, establish, available, available_period, event, delivery, cancel)
 		VALUES
-			(#id#, #currency#, #establishFee#, #availableFee#, 
-			CAST(#availablePeriod# AS interval), #eventFee#,
-			#deliveryFee#, #cancelFee#)
+			(#{id}, #{currency}, #{establishFee}, #{availableFee}, 
+			CAST(#{availablePeriod} AS interval), #{eventFee},
+			#{deliveryFee}, #{cancelFee})
 	</insert>
 
-	<update id="update-Fee" parameterClass="Fee">
+	<update id="update-Fee" parameterType="Fee">
 		UPDATE solardras.fee SET
-			currency = #currency#,
-			establish = #establishFee#,
-			available = #availableFee#,
-			available_period = CAST(#availablePeriod# AS interval),
-			event = #eventFee#,
-			delivery = #deliveryFee#,
-			cancel = #cancelFee#
+			currency = #{currency},
+			establish = #{establishFee},
+			available = #{availableFee},
+			available_period = CAST(#{availablePeriod} AS interval),
+			event = #{eventFee},
+			delivery = #{deliveryFee},
+			cancel = #{cancelFee}
 		WHERE
-			id = #id#
+			id = #{id}
 	</update>
 
-	<resultMap id="FeeFullResult" class="Fee">
-		<result column="fee_id" property="id"/>
+	<resultMap id="FeeFullResult" type="Fee">
+		<id column="fee_id" property="id"/>
 		<result column="fee_created" property="created"/>
 		<result column="currency" property="currency"/>
 		<result column="establish" property="establishFee"/>
@@ -46,11 +44,11 @@
 		CAST(f.available_period AS text) as available_period, f.event, f.delivery, f.cancel
 	</sql>
 	
-	<select id="get-Fee-for-id" resultMap="FeeFullResult" parameterClass="long">
+	<select id="get-Fee-for-id" resultMap="FeeFullResult" parameterType="long">
 		SELECT
 		<include refid="fragment-Fee-full-result"/>
 		FROM solardras.fee f
-		WHERE id = #id#
+		WHERE id = #{id}
 	</select>
 
-</sqlMap>
+</mapper>

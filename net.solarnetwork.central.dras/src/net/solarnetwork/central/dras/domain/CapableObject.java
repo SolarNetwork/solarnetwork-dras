@@ -18,8 +18,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 
  * 02111-1307 USA
  * ==================================================================
- * $Id$
- * ==================================================================
  */
 
 package net.solarnetwork.central.dras.domain;
@@ -38,7 +36,7 @@ import org.springframework.beans.PropertyAccessorFactory;
  * {@net.solarnetwork.central.dras.domain.Location} entity.
  * 
  * @author matt
- * @version $Revision$
+ * @version 1.0
  */
 public class CapableObject<T extends Identity<Long>> 
 implements Serializable, CapabilityInformation {

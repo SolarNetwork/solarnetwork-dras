@@ -1,30 +1,28 @@
-<?xml version="1.0" encoding="UTF-8" ?> 
-<!DOCTYPE sqlMap 
-    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" 
-    "http://ibatis.apache.org/dtd/sql-map-2.dtd"> 
-<sqlMap namespace="Program">
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="net.solarnetwork.central.dras.dao.mybatis.Program">
 	
-	<insert id="insert-Program" parameterClass="Program">
-		<selectKey resultClass="long" keyProperty="id"> 
+	<insert id="insert-Program" parameterType="Program">
+		<selectKey resultType="long" keyProperty="id" order="BEFORE"> 
               SELECT nextval('solardras.solardras_seq') AS id 
 		</selectKey>
 		INSERT INTO solardras.program 
 			(id, creator, pro_name, priority, enabled)
 		VALUES
-			(#id#, #creator#, #name#, #priority#, #enabled#)
+			(#{id}, #{creator}, #{name}, #{priority}, #{enabled})
 	</insert>
 
-	<update id="update-Program" parameterClass="Program">
+	<update id="update-Program" parameterType="Program">
 		UPDATE solardras.program SET
-			pro_name = #name#,
-			priority = #priority#, 
-			enabled = #enabled#
+			pro_name = #{name},
+			priority = #{priority}, 
+			enabled = #{enabled}
 		WHERE
-			id = #id#
+			id = #{id}
 	</update>
 
-	<resultMap id="ProgramFullResult" class="Program">
-		<result column="id" property="id"/>
+	<resultMap id="ProgramFullResult" type="Program">
+		<id column="id" property="id"/>
 		<result column="created" property="created"/>
 		<result column="creator" property="creator"/>
 		<result column="pro_name" property="name"/>
@@ -32,16 +30,16 @@
 		<result column="enabled" property="enabled"/>
 	</resultMap>
 	
-	<select id="get-Program-for-id" resultMap="ProgramFullResult" parameterClass="long">
+	<select id="get-Program-for-id" resultMap="ProgramFullResult" parameterType="long">
 		SELECT id, created, creator, pro_name, priority, enabled
 		FROM solardras.program
-		WHERE id = #id#
+		WHERE id = #{id}
 	</select>
 
 	<!-- Program filter -->
 
-	<resultMap id="ProgramFilterResult" class="Program">
-		<result column="id" property="id"/>
+	<resultMap id="ProgramFilterResult" type="Program">
+		<id column="id" property="id"/>
 		<result column="pro_name" property="name"/>
 		<result column="enabled" property="enabled"/>
 	</resultMap>
@@ -63,116 +61,98 @@
 	WHERE
 		m.usr_id = 10
 	 -->
-	<select id="findall-Program-Match" resultMap="ProgramFilterResult" parameterClass="map">
+	<select id="findall-Program-Match" resultMap="ProgramFilterResult" parameterType="map">
 		SELECT p.id, p.pro_name, p.enabled
 		FROM solardras.program p
-		<isNotNull property="filter.userId">
+		<if test="filter.userId != null">
 		INNER JOIN solardras.program_user m ON m.pro_id = p.id
-		</isNotNull>
-		<dynamic prepend="WHERE">
-			<isPropertyAvailable prepend="AND" property="fts">
-			fts_default @@ plainto_tsquery(#fts#)
-			</isPropertyAvailable>
-			<isNotNull prepend="AND" property="filter.userId">
-			m.usr_id = #filter.userId#
+		</if>
+		<where>
+			<if test="fts != null">
+			fts_default @@ plainto_tsquery(#{fts})
+			</if>
+			<if test="filter.userId != null">
+			AND m.usr_id = #{filter.userId}
 			AND m.eff_id = (
 				SELECT MAX(eff_id)
 				FROM solardras.program_user m
 				INNER JOIN solardras.effective e ON e.id = m.eff_id
 				WHERE m.pro_id = p.id 
-					AND e.effective &lt;= 
-					<isPropertyAvailable property="date">
-						#date,jdbcType=TIMESTAMP#
-					</isPropertyAvailable>
-					<isNotPropertyAvailable property="date">
-						CURRENT_TIMESTAMP
-					</isNotPropertyAvailable>
+					<include refid="net.solarnetwork.central.dras.dao.mybatis.fragment-effective-date-where-lte"/>
 			)
-			</isNotNull>
-		</dynamic>
+			</if>
+		</where>
 		ORDER BY p.id
 	</select>
 
 	<!-- Program User member -->
 	
-	<resultMap id="UserMemberResult" class="User">
-		<result column="id" property="id"/>
+	<resultMap id="UserMemberResult" type="User">
+		<id column="id" property="id"/>
 		<result column="username" property="username"/>
 	</resultMap>
 
-	<select id="findall-Program-Member" resultMap="UserMemberResult" parameterClass="map">
+	<select id="findall-Program-Member" resultMap="UserMemberResult" parameterType="map">
 		SELECT u.id, u.username
 		FROM solardras.program_user m
 		INNER JOIN solardras.dras_user u ON u.id = m.usr_id
-		WHERE m.pro_id = #id#
+		WHERE m.pro_id = #{id}
 		AND m.eff_id = (
 			SELECT MAX(eff_id)
 			FROM solardras.program_user m
 			INNER JOIN solardras.effective e ON e.id = m.eff_id
-			WHERE m.pro_id = #id# 
-				AND e.effective &lt;= 
-				<isPropertyAvailable property="date">
-					#date,jdbcType=TIMESTAMP#
-				</isPropertyAvailable>
-				<isNotPropertyAvailable property="date">
-					CURRENT_TIMESTAMP
-				</isNotPropertyAvailable>
+			WHERE m.pro_id = #{id} 
+				<include refid="net.solarnetwork.central.dras.dao.mybatis.fragment-effective-date-where-lte"/>
 		)
 		ORDER BY u.id
 	</select>
 	
-	<delete id="delete-Program-Member" parameterClass="map">
+	<delete id="delete-Program-Member" parameterType="map">
 		DELETE FROM solardras.program_user
-		WHERE pro_id = #id# AND eff_id = #effectiveId#
+		WHERE pro_id = #{id} AND eff_id = #{effectiveId}
 	</delete>
 
-	<insert id="insert-Program-Member" parameterClass="map">
+	<insert id="insert-Program-Member" parameterType="map">
 		INSERT INTO solardras.program_user
 			(pro_id, usr_id, eff_id)
 		VALUES
-			(#id#, #memberId#, #effectiveId#)
+			(#{id}, #{memberId}, #{effectiveId})
 	</insert>
 
-	<resultMap id="ParticipantMemberResult" class="Participant">
+	<resultMap id="ParticipantMemberResult" type="Participant">
 		<result column="id" property="id"/>
 		<result column="usr_id" property="userId"/>
 		<result column="loc_id" property="locationId"/>
 	</resultMap>
 
-	<select id="findall-Program-Participant" resultMap="ParticipantMemberResult" parameterClass="map">
+	<select id="findall-Program-Participant" resultMap="ParticipantMemberResult" parameterType="map">
 		SELECT p.id, p.usr_id, p.loc_id
 		FROM solardras.program_participant m
 		INNER JOIN solardras.participant p ON p.id = m.par_id
-		WHERE m.pro_id = #id#
+		WHERE m.pro_id = #{id}
 		AND m.eff_id = (
 			SELECT MAX(eff_id)
 			FROM solardras.program_participant m
 			INNER JOIN solardras.effective e ON e.id = m.eff_id
-			WHERE m.pro_id = #id# 
-				AND e.effective &lt;= 
-				<isPropertyAvailable property="date">
-					#date,jdbcType=TIMESTAMP#
-				</isPropertyAvailable>
-				<isNotPropertyAvailable property="date">
-					CURRENT_TIMESTAMP
-				</isNotPropertyAvailable>
+			WHERE m.pro_id = #{id} 
+				<include refid="net.solarnetwork.central.dras.dao.mybatis.fragment-effective-date-where-lte"/>
 		)
 		ORDER BY p.id
 	</select>
 	
-	<delete id="delete-Program-Participant" parameterClass="map">
+	<delete id="delete-Program-Participant" parameterType="map">
 		DELETE FROM solardras.program_participant
-		WHERE pro_id = #id# AND eff_id = #effectiveId#
+		WHERE pro_id = #{id} AND eff_id = #{effectiveId}
 	</delete>
 
-	<insert id="insert-Program-Participant" parameterClass="map">
+	<insert id="insert-Program-Participant" parameterType="map">
 		INSERT INTO solardras.program_participant
 			(pro_id, par_id, eff_id)
 		VALUES
-			(#id#, #memberId#, #effectiveId#)
+			(#{id}, #{memberId}, #{effectiveId})
 	</insert>
 
-	<select id="findall-Program-EventRule" resultMap="EventRule.EventRuleFullResult" parameterClass="map">
+	<select id="findall-Program-EventRule" resultMap="net.solarnetwork.central.dras.dao.mybatis.EventRule.EventRuleFullResult" parameterType="map">
 		SELECT e.id, e.created, e.creator, e.kind, e.rule_name, 
 			e.min_value, e.max_value, e.schedule_kind,
 			en.target_value as enumeration,
@@ -181,63 +161,45 @@
 		LEFT OUTER JOIN solardras.event_rule e ON e.id = m.evr_id
 		LEFT OUTER JOIN solardras.event_rule_enum en ON en.evr_id = e.id
 		LEFT OUTER JOIN solardras.event_rule_schedule s ON s.evr_id = e.id
-		WHERE m.pro_id = #id#
+		WHERE m.pro_id = #{id}
 		AND m.eff_id = (
 			SELECT MAX(eff_id)
 			FROM solardras.program_event_rule m
 			INNER JOIN solardras.effective e ON e.id = m.eff_id
-			WHERE m.pro_id = #id# 
-				AND e.effective &lt;= 
-				<isPropertyAvailable property="date">
-					#date,jdbcType=TIMESTAMP#
-				</isPropertyAvailable>
-				<isNotPropertyAvailable property="date">
-					CURRENT_TIMESTAMP
-				</isNotPropertyAvailable>
+			WHERE m.pro_id = #{id} 
+				<include refid="net.solarnetwork.central.dras.dao.mybatis.fragment-effective-date-where-lte"/>
 		)
 		ORDER BY e.id
 	</select>
 	
-	<delete id="delete-Program-EventRule" parameterClass="map">
+	<delete id="delete-Program-EventRule" parameterType="map">
 		DELETE FROM solardras.program_event_rule
-		WHERE pro_id = #id# AND eff_id = #effectiveId#
+		WHERE pro_id = #{id} AND eff_id = #{effectiveId}
 	</delete>
 
-	<insert id="insert-Program-EventRule" parameterClass="map">
+	<insert id="insert-Program-EventRule" parameterType="map">
 		INSERT INTO solardras.program_event_rule
 			(pro_id, evr_id, eff_id)
 		VALUES
-			(#id#, #memberId#, #effectiveId#)
+			(#{id}, #{memberId}, #{effectiveId})
 	</insert>
 
-	<select id="findall-Program-User" parameterClass="map" resultMap="UserMemberResult">
+	<select id="findall-Program-User" parameterType="map" resultMap="UserMemberResult">
 		WITH
 		eu AS (
 			SELECT DISTINCT ON (m.pro_id) m.pro_id, m.eff_id
 			FROM solardras.program_user m
 			INNER JOIN solardras.effective e ON e.id = m.eff_id
-			WHERE e.effective &lt;= 
-				<isPropertyAvailable property="date">
-					#date,jdbcType=TIMESTAMP#
-				</isPropertyAvailable>
-				<isNotPropertyAvailable property="date">
-					CURRENT_TIMESTAMP
-				</isNotPropertyAvailable>
-				AND m.pro_id = #id#
+			WHERE m.pro_id = #{id}
+				<include refid="net.solarnetwork.central.dras.dao.mybatis.fragment-effective-date-where-lte"/>
 			ORDER BY m.pro_id, e.effective DESC
 		),
 		ep AS (
 			SELECT DISTINCT ON (m.pro_id) m.pro_id, m.eff_id
 			FROM solardras.program_participant m
 			INNER JOIN solardras.effective e ON e.id = m.eff_id
-			WHERE e.effective &lt;= 
-				<isPropertyAvailable property="date">
-					#date,jdbcType=TIMESTAMP#
-				</isPropertyAvailable>
-				<isNotPropertyAvailable property="date">
-					CURRENT_TIMESTAMP
-				</isNotPropertyAvailable>
-				AND m.pro_id = #id#
+			WHERE  m.pro_id = #{id}
+				<include refid="net.solarnetwork.central.dras.dao.mybatis.fragment-effective-date-where-lte"/>
 			ORDER BY m.pro_id, e.effective DESC
 		)
 		
@@ -253,46 +215,40 @@
 		FROM solardras.dras_user u
 		INNER JOIN solardras.participant p ON p.usr_id = u.id
 		INNER JOIN solardras.program_participant pp
-			ON pp.pro_id = #id# AND pp.par_id = p.id
+			ON pp.pro_id = #{id} AND pp.par_id = p.id
 		INNER JOIN ep ON ep.pro_id = pp.pro_id AND ep.eff_id = pp.eff_id
 	</select>
 
 	<!-- Constraint support -->
 
-	<select id="findall-Program-Constraint" resultMap="Constraint.ConstraintFullResult" parameterClass="map">
+	<select id="findall-Program-Constraint" resultMap="net.solarnetwork.central.dras.dao.mybatis.Constraint.ConstraintFullResult" parameterType="map">
 		SELECT 
-		<include refid="fragment-Constraint-full-result"/>
+		<include refid="net.solarnetwork.central.dras.dao.mybatis.Constraint.fragment-Constraint-full-result"/>
 		FROM solardras.program_constraint m
 		INNER JOIN solardras.dras_constraint c ON c.id = m.con_id
 		LEFT OUTER JOIN solardras.dras_constraint_dtwindow cwin ON cwin.con_id = c.id
-		WHERE m.pro_id = #id#
+		WHERE m.pro_id = #{id}
 			AND m.eff_id = (
 				SELECT MAX(eff_id)
 				FROM solardras.program_constraint m
 				INNER JOIN solardras.effective e ON e.id = m.eff_id
-				WHERE m.pro_id = #id# 
-					AND e.effective &lt;= 
-					<isPropertyAvailable property="date">
-						#date,jdbcType=TIMESTAMP#
-					</isPropertyAvailable>
-					<isNotPropertyAvailable property="date">
-						CURRENT_TIMESTAMP
-					</isNotPropertyAvailable>
+				WHERE m.pro_id = #{id} 
+					<include refid="net.solarnetwork.central.dras.dao.mybatis.fragment-effective-date-where-lte"/>
 			)
 		ORDER BY c.id, cwin.idx
 	</select>
 	
-	<delete id="delete-Program-Constraint" parameterClass="map">
+	<delete id="delete-Program-Constraint" parameterType="map">
 		DELETE FROM solardras.program_constraint
-		WHERE pro_id = #id# AND eff_id = #effectiveId#
+		WHERE pro_id = #{id} AND eff_id = #{effectiveId}
 	</delete>
 
-	<insert id="insert-Program-Constraint" parameterClass="map">
+	<insert id="insert-Program-Constraint" parameterType="map">
 		INSERT INTO 
 			solardras.program_constraint
 			(pro_id, con_id, eff_id)
 		VALUES
-			(#id#, #memberId#, #effectiveId#)
+			(#{id}, #{memberId}, #{effectiveId})
 	</insert>
 
-</sqlMap>
+</mapper>

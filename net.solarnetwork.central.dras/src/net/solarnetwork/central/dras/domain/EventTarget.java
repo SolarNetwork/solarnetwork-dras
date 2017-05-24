@@ -18,8 +18,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 
  * 02111-1307 USA
  * ==================================================================
- * $Id$
- * ==================================================================
  */
 
 package net.solarnetwork.central.dras.domain;
@@ -32,7 +30,7 @@ import org.joda.time.Duration;
  * A target value for a given event at a specific point in time during the event.
  * 
  * @author matt
- * @version $Revision$
+ * @version 1.0
  */
 public class EventTarget implements Cloneable, Serializable, Comparable<EventTarget> {
 

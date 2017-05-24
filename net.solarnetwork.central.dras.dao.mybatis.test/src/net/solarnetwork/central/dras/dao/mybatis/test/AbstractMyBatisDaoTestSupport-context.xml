@@ -15,7 +15,9 @@
 				<value>net.solarnetwork.central.dras.domain.Effective</value>
 				<value>net.solarnetwork.central.dras.domain.Event</value>
 				<value>net.solarnetwork.central.dras.domain.EventExecutionInfo</value>
+				<value>net.solarnetwork.central.dras.domain.EventExecutionTargets</value>
 				<value>net.solarnetwork.central.dras.domain.EventRule</value>
+				<value>net.solarnetwork.central.dras.domain.EventTarget</value>
 				<value>net.solarnetwork.central.dras.domain.EventTargets</value>
 				<value>net.solarnetwork.central.dras.domain.Fee</value>
 				<value>net.solarnetwork.central.dras.domain.Location</value>
@@ -24,15 +26,20 @@
 				<value>net.solarnetwork.central.dras.domain.ParticipantGroup</value>
 				<value>net.solarnetwork.central.dras.domain.Program</value>
 				<value>net.solarnetwork.central.dras.domain.User</value>
+				<value>net.solarnetwork.central.dras.domain.UserContact</value>
 				<value>net.solarnetwork.central.dras.domain.UserGroup</value>
+				<value>net.solarnetwork.central.dras.domain.UserRole</value>
 			</list>
 		</property>
 		<property name="typeHandlers">
 			<list>
 				<bean class="net.solarnetwork.central.dao.mybatis.type.JodaDateTimeTypeHandler"/>
+				<bean class="net.solarnetwork.central.dao.mybatis.type.JodaDurationTypeHandler"/>
 				<bean class="net.solarnetwork.central.dao.mybatis.type.JodaLocalDateTimeTypeHandler"/>
 				<bean class="net.solarnetwork.central.dao.mybatis.type.JodaLocalDateTypeHandler"/>
 				<bean class="net.solarnetwork.central.dao.mybatis.type.JodaLocalTimeTypeHandler"/>
+				<bean class="net.solarnetwork.central.dao.mybatis.type.JodaPeriodTypeHandler"/>
+				<bean class="net.solarnetwork.central.dao.mybatis.type.TextArrayTypeHandler"/>
 			</list>
 		</property>
 		<property name="mapperLocations">
