@@ -52,7 +52,7 @@ import net.solarnetwork.central.test.AbstractCentralTransactionalTest;
  * @version 1.0
  */
 @ContextConfiguration
-public class AbstractMyBatisDaoTestSupport extends AbstractCentralTransactionalTest {
+public abstract class AbstractMyBatisDaoTestSupport extends AbstractCentralTransactionalTest {
 
 	public static final Long TEST_USER_ID = Long.valueOf(-99);
 	public static final String TEST_USERNAME = "unittest";
