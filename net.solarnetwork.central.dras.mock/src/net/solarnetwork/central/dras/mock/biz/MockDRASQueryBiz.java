@@ -24,15 +24,7 @@ package net.solarnetwork.central.dras.mock.biz;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import net.solarnetwork.central.datum.domain.ConsumptionDatum;
-import net.solarnetwork.central.datum.domain.DatumQueryCommand;
-import net.solarnetwork.central.datum.domain.NodeDatum;
-import net.solarnetwork.central.datum.domain.PowerDatum;
-import net.solarnetwork.central.datum.domain.ReportingConsumptionDatum;
-import net.solarnetwork.central.datum.domain.ReportingPowerDatum;
-import net.solarnetwork.central.query.biz.QueryBiz;
-
+import java.util.Set;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Duration;
@@ -40,103 +32,157 @@ import org.joda.time.Interval;
 import org.joda.time.MutableDateTime;
 import org.joda.time.Period;
 import org.joda.time.ReadableInterval;
+import net.solarnetwork.central.datum.domain.AggregateGeneralLocationDatumFilter;
+import net.solarnetwork.central.datum.domain.AggregateGeneralNodeDatumFilter;
+import net.solarnetwork.central.datum.domain.GeneralLocationDatumFilter;
+import net.solarnetwork.central.datum.domain.GeneralLocationDatumFilterMatch;
+import net.solarnetwork.central.datum.domain.GeneralNodeDatumFilter;
+import net.solarnetwork.central.datum.domain.GeneralNodeDatumFilterMatch;
+import net.solarnetwork.central.datum.domain.ReportingGeneralLocationDatumMatch;
+import net.solarnetwork.central.datum.domain.ReportingGeneralNodeDatum;
+import net.solarnetwork.central.datum.domain.ReportingGeneralNodeDatumMatch;
+import net.solarnetwork.central.domain.FilterResults;
+import net.solarnetwork.central.domain.Location;
+import net.solarnetwork.central.domain.LocationMatch;
+import net.solarnetwork.central.domain.SortDescriptor;
+import net.solarnetwork.central.query.biz.QueryBiz;
+import net.solarnetwork.central.query.domain.ReportableInterval;
+import net.solarnetwork.central.support.BasicFilterResults;
+import net.solarnetwork.domain.GeneralNodeDatumSamples;
 
 /**
- * Mock implementation of QueryBiz that supports the {@link MockDRASObserverBiz}.
+ * Mock implementation of QueryBiz that supports the
+ * {@link MockDRASObserverBiz}.
  * 
  * @author matt
- * @version 1.0
+ * @version 1.1
  */
 public class MockDRASQueryBiz implements QueryBiz {
-	
+
+	@SuppressWarnings("unused")
 	private final ReadableInterval reportableInterval;
-	
-	private final float consumptionWattHours = 1000.0f;
+
 	private final float generationWattHours = 100.0f;
-	
+
 	/**
 	 * Constructor.
 	 * 
-	 * @param observerBiz the observer biz to setup mock data with
+	 * @param observerBiz
+	 *        the observer biz to setup mock data with
 	 */
 	public MockDRASQueryBiz(MockDRASObserverBiz observerBiz) {
 		DateTimeZone tz = DateTimeZone.forID("Pacific/Auckland");
-		reportableInterval = new Interval(
-				new DateTime(2011, 1, 1, 8, 0, 0, 0, tz),
+		reportableInterval = new Interval(new DateTime(2011, 1, 1, 8, 0, 0, 0, tz),
 				new DateTime(2011, 2, 1, 8, 0, 0, 0, tz));
 		/*
-		for ( Program program : observerBiz.getAllPrograms(null) ) {
-			for ( NodeIdentity node : observerBiz.getProgramParticipants(program, null, null)) {
-				
-				
-			}
-		}
-		*/
+		 * for ( Program program : observerBiz.getAllPrograms(null) ) { for (
+		 * NodeIdentity node : observerBiz.getProgramParticipants(program, null,
+		 * null)) {
+		 * 
+		 * 
+		 * } }
+		 */
 	}
 
 	@Override
-	public ReadableInterval getReportableInterval(Long nodeId,
-			Class<? extends NodeDatum>[] types) {
-		return reportableInterval;
+	public ReportableInterval getReportableInterval(Long nodeId, String sourceId) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	@Override
-	public ReadableInterval getNetworkReportableInterval(
-			Class<? extends NodeDatum>[] types) {
-		return reportableInterval;
+	public Set<String> getAvailableSources(Long nodeId, DateTime start, DateTime end) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	@Override
-	public List<? extends NodeDatum> getAggregatedDatum(
-			Class<? extends NodeDatum> datumClass, DatumQueryCommand criteria) {
-		MutableDateTime mdt = new MutableDateTime(criteria.getStartDate());
+	public FilterResults<GeneralNodeDatumFilterMatch> findFilteredGeneralNodeDatum(
+			GeneralNodeDatumFilter filter, List<SortDescriptor> sortDescriptors, Integer offset,
+			Integer max) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public FilterResults<ReportingGeneralNodeDatumMatch> findFilteredAggregateGeneralNodeDatum(
+			AggregateGeneralNodeDatumFilter filter, List<SortDescriptor> sortDescriptors, Integer offset,
+			Integer max) {
+		MutableDateTime mdt = new MutableDateTime(filter.getStartDate());
 		Period period;
-		switch ( criteria.getAggregate() ) {
-		case Hour:
-			period = Period.hours(1);
-			break;
-			
-		case Day:
-			period = Period.days(1);
-			break;
-			
-		case Week:
-			period = Period.weeks(1);
-			break;
-			
-		case Month:
-			period = Period.months(1);
-			break;
-			
-		default:
-			period = Period.minutes(1);
+		switch (filter.getAggregation()) {
+			case Hour:
+				period = Period.hours(1);
+				break;
+
+			case Day:
+				period = Period.days(1);
+				break;
+
+			case Week:
+				period = Period.weeks(1);
+				break;
+
+			case Month:
+				period = Period.months(1);
+				break;
+
+			default:
+				period = Period.minutes(1);
 		}
-		List<NodeDatum> results = new ArrayList<NodeDatum>();
+		List<ReportingGeneralNodeDatumMatch> results = new ArrayList<ReportingGeneralNodeDatumMatch>();
 		do {
-			NodeDatum datum = null;
-			if ( ConsumptionDatum.class.isAssignableFrom(datumClass) ) {
-				ReportingConsumptionDatum d = new ReportingConsumptionDatum();
-				d.setNodeId(criteria.getNodeId());
-				d.setCreated(mdt.toDateTime());
-				Duration dur = period.toDurationFrom(mdt);
-				float hours = (float)((double)dur.getMillis() / (double)(1000 * 60 * 60));
-				d.setWattHours(Double.valueOf(hours * consumptionWattHours));
-				datum = d;
-			} else if ( PowerDatum.class.isAssignableFrom(datumClass) ) {
-				ReportingPowerDatum d = new ReportingPowerDatum();
-				d.setNodeId(criteria.getNodeId());
-				d.setCreated(mdt.toDateTime());
-				Duration dur = period.toDurationFrom(mdt);
-				float hours = (float)((double)dur.getMillis() / (double)(1000 * 60 * 60));
-				d.setWattHours(Double.valueOf(hours * generationWattHours));
-				datum = d;
-			}
-			if ( datum != null ) {
-				results.add(datum);
-			}
+			ReportingGeneralNodeDatum d = new ReportingGeneralNodeDatum();
+			d.setNodeId(filter.getNodeId());
+			d.setCreated(mdt.toDateTime());
+
+			GeneralNodeDatumSamples samples = new GeneralNodeDatumSamples();
+
+			Duration dur = period.toDurationFrom(mdt);
+			float hours = (float) ((double) dur.getMillis() / (double) (1000 * 60 * 60));
+			samples.putAccumulatingSampleValue("wattHours", Double.valueOf(hours * generationWattHours));
+
+			d.setSamples(samples);
+			results.add(d);
 			mdt.add(period);
-		} while (mdt.isBefore(criteria.getEndDate()));
-		return results;
+		} while ( mdt.isBefore(filter.getEndDate()) );
+		return new BasicFilterResults<ReportingGeneralNodeDatumMatch>(results);
+
+	}
+
+	@Override
+	public FilterResults<GeneralLocationDatumFilterMatch> findGeneralLocationDatum(
+			GeneralLocationDatumFilter filter, List<SortDescriptor> sortDescriptors, Integer offset,
+			Integer max) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public FilterResults<ReportingGeneralLocationDatumMatch> findAggregateGeneralLocationDatum(
+			AggregateGeneralLocationDatumFilter filter, List<SortDescriptor> sortDescriptors,
+			Integer offset, Integer max) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Set<String> getLocationAvailableSources(Long locationId, DateTime start, DateTime end) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ReportableInterval getLocationReportableInterval(Long locationId, String sourceId) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public FilterResults<LocationMatch> findFilteredLocations(Location filter,
+			List<SortDescriptor> sortDescriptors, Integer offset, Integer max) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

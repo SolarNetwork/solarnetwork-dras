@@ -22,6 +22,7 @@
 
 package net.solarnetwork.central.dras.mock.biz;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -33,13 +34,17 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicLong;
-
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+import org.joda.time.Duration;
+import org.joda.time.MutableDateTime;
+import org.joda.time.Period;
 import net.solarnetwork.central.dao.ObjectCriteria;
-import net.solarnetwork.central.dao.SortDescriptor;
 import net.solarnetwork.central.domain.Identity;
 import net.solarnetwork.central.domain.SolarLocation;
 import net.solarnetwork.central.domain.SolarNode;
 import net.solarnetwork.central.domain.SolarNodeGroup;
+import net.solarnetwork.central.domain.SortDescriptor;
 import net.solarnetwork.central.dras.biz.DRASObserverBiz;
 import net.solarnetwork.central.dras.dao.EventFilter;
 import net.solarnetwork.central.dras.dao.ParticipantFilter;
@@ -53,49 +58,43 @@ import net.solarnetwork.central.dras.domain.Program;
 import net.solarnetwork.central.dras.support.SimpleCapabilityInformation;
 import net.solarnetwork.central.security.SecurityException;
 
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
-import org.joda.time.Duration;
-import org.joda.time.MutableDateTime;
-import org.joda.time.Period;
-
 /**
  * Mock implementation of {@link DRASObserverBiz}.
  * 
  * @author matt
- * @version 1.0
+ * @version 1.1
  */
 public class MockDRASObserverBiz implements DRASObserverBiz {
-	
-	private List<SolarNodeGroup> uniGroups;
-	private List<CapabilityInformation> participantGroups;
-	private Map<Long, Set<CapabilityInformation>> participantGroupMemebers;
-	private Set<Identity<Long>> uniProgramParticipants;
-	private Program uniProgram;
-	private List<Event> uniEvents;
-	private Map<Long, EventParticipants> uniEventParticipants;
-	private Map<Long, EventTargets> uniEventTargets;
-	private Map<Long, SolarLocation> uniLocations;
+
+	private final List<SolarNodeGroup> uniGroups;
+	private final List<CapabilityInformation> participantGroups;
+	private final Map<Long, Set<CapabilityInformation>> participantGroupMemebers;
+	private final Set<Identity<Long>> uniProgramParticipants;
+	private final Program uniProgram;
+	private final List<Event> uniEvents;
+	private final Map<Long, EventParticipants> uniEventParticipants;
+	private final Map<Long, EventTargets> uniEventTargets;
+	private final Map<Long, SolarLocation> uniLocations;
 	private Map<Long, EventRule> uniEventRules;
 
 	private final double minLatitude = -37.5655F;
 	private final double maxLatitude = -36.6670F;
 	private final double minLongitude = 174.258957F;
 	private final double maxLongitude = 175.663147F;
-	
+
 	private final double groupLatitude = -36.900764F;
 	private final double groupLongitude = 174.772224F;
 
 	private final Long participantGenerationCapacity = 10000L;
 	private final Long participantStorageCapacity = 5000L;
-	final int numGroups = 2;	
+	final int numGroups = 2;
 	final int numNodes = 5;
 	final int numEvents = 15;
-	
+
 	// package visibility to share with operator
 	SolarLocation uniLocation;
 	AtomicLong counter = new AtomicLong(0);
-	
+
 	void addEventRule(EventRule rule) {
 		if ( uniEventRules == null ) {
 			uniEventRules = new LinkedHashMap<Long, EventRule>();
@@ -106,37 +105,37 @@ public class MockDRASObserverBiz implements DRASObserverBiz {
 	void addGroup(SolarNodeGroup group) {
 		uniGroups.add(group);
 	}
-	
+
 	void addEvent(Event event, EventParticipants participants, EventTargets targets) {
 		uniEvents.add(event);
 		uniEventParticipants.put(event.getId(), participants);
 		uniEventTargets.put(event.getId(), targets);
 	}
-	
-	void setEventTargets(Event event, EventTargets targets ) {
+
+	void setEventTargets(Event event, EventTargets targets) {
 		uniEventTargets.put(event.getId(), targets);
 	}
-	
+
 	void setEventParticipants(Event event, EventParticipants participants) {
 		uniEventParticipants.put(event.getId(), participants);
 	}
-	
+
 	SolarLocation createRandomLocation() {
-		SolarLocation newLocation = (SolarLocation)uniLocation.clone();
+		SolarLocation newLocation = (SolarLocation) uniLocation.clone();
 		newLocation.setId(counter.decrementAndGet());
 		newLocation.setCreated(new DateTime());
 		double latOffset = Math.random() * Math.abs(maxLatitude - minLatitude);
-		newLocation.setLatitude(minLatitude + latOffset);
+		newLocation.setLatitude(new BigDecimal(minLatitude + latOffset));
 		double longOffset = Math.random() * Math.abs(maxLongitude - minLongitude);
-		newLocation.setLongitude(minLongitude + longOffset);
-		
+		newLocation.setLongitude(new BigDecimal(minLongitude + longOffset));
+
 		uniLocations.put(newLocation.getId(), newLocation);
 		return newLocation;
 	}
-	
+
 	public MockDRASObserverBiz() {
 		TimeZone tz = TimeZone.getTimeZone("Pacific/Auckland");
-		
+
 		uniLocation = new SolarLocation();
 		uniLocation.setId(counter.decrementAndGet());
 		uniLocation.setCountry("NZ");
@@ -144,12 +143,12 @@ public class MockDRASObserverBiz implements DRASObserverBiz {
 		uniLocation.setName("Mock Location");
 		uniLocation.setRegion("UNI");
 		uniLocation.setTimeZoneId(tz.getID());
-		uniLocation.setLatitude(groupLatitude);
-		uniLocation.setLongitude(groupLongitude);
-		
+		uniLocation.setLatitude(new BigDecimal(groupLatitude));
+		uniLocation.setLongitude(new BigDecimal(groupLongitude));
+
 		uniLocations = new LinkedHashMap<Long, SolarLocation>();
 		uniLocations.put(uniLocation.getId(), uniLocation);
-		
+
 		uniGroups = new ArrayList<SolarNodeGroup>(numGroups);
 		addGroup(new SolarNodeGroup(counter.decrementAndGet(), uniLocation.getId(), "Mock Group A"));
 		addGroup(new SolarNodeGroup(counter.decrementAndGet(), uniLocation.getId(), "Mock Group B"));
@@ -162,14 +161,16 @@ public class MockDRASObserverBiz implements DRASObserverBiz {
 			groupInfo.setStorageCapacityWattHours(participantStorageCapacity);
 			participantGroups.add(groupInfo);
 		}
-		
+
 		uniProgramParticipants = new LinkedHashSet<Identity<Long>>(numNodes);
 		participantGroupMemebers = new LinkedHashMap<Long, Set<CapabilityInformation>>(numGroups);
 		for ( int i = 0; i < numNodes; i++ ) {
-			SolarNode participant = new SolarNode(counter.decrementAndGet(), createRandomLocation().getId());
+			SolarNode participant = new SolarNode(counter.decrementAndGet(),
+					createRandomLocation().getId());
 			uniProgramParticipants.add(participant);
 			int groupIndex = (i % numGroups);
-			SimpleCapabilityInformation group = (SimpleCapabilityInformation)participantGroups.get(groupIndex);
+			SimpleCapabilityInformation group = (SimpleCapabilityInformation) participantGroups
+					.get(groupIndex);
 			Set<CapabilityInformation> groupMembers = participantGroupMemebers.get(group.getId());
 			if ( groupMembers == null ) {
 				groupMembers = new LinkedHashSet<CapabilityInformation>(numNodes);
@@ -185,67 +186,60 @@ public class MockDRASObserverBiz implements DRASObserverBiz {
 			group.addStorageCapacityWattHours(participantStorageCapacity);
 		}
 		uniProgram = new Program(counter.decrementAndGet(), "UNI Program", 1);
-		
-		MutableDateTime mdt = new MutableDateTime(
-				2011, 1, 1, 8, 0, 0, 0,
-				DateTimeZone.forTimeZone(tz));
+
+		MutableDateTime mdt = new MutableDateTime(2011, 1, 1, 8, 0, 0, 0, DateTimeZone.forTimeZone(tz));
 		uniEvents = new ArrayList<Event>(numEvents);
 		uniEventParticipants = new LinkedHashMap<Long, EventParticipants>(numEvents);
 		uniEventTargets = new LinkedHashMap<Long, EventTargets>(numEvents);
-		
-		EventRule eventRule = new EventRule(counter.decrementAndGet(), 
-				EventRule.RuleKind.LOAD_AMOUNT,
+
+		EventRule eventRule = new EventRule(counter.decrementAndGet(), EventRule.RuleKind.LOAD_AMOUNT,
 				EventRule.ScheduleKind.DYNAMIC);
 		addEventRule(eventRule);
-		
+
 		for ( int i = 0; i < numEvents; i++ ) {
-			Event event = new Event(counter.decrementAndGet(), uniProgram.getId(), 
-					String.format("Mock Event %d", (i+1)), 
-					mdt.toDateTime(),
+			Event event = new Event(counter.decrementAndGet(), uniProgram.getId(),
+					String.format("Mock Event %d", (i + 1)), mdt.toDateTime(),
 					mdt.toDateTime().plus(Period.hours(2)));
-			
+
 			Set<Identity<Long>> groupSet = new LinkedHashSet<Identity<Long>>(2);
-			switch ( i % 3 ) {
-			case 0:
-				groupSet.add(participantGroups.get(0));
-				break;
-				
-			case 1:
-				groupSet.add(participantGroups.get(1));
-				break;
-				
-			case 2:
-				groupSet.add(participantGroups.get(0));
-				groupSet.add(participantGroups.get(1));
-				break;
+			switch (i % 3) {
+				case 0:
+					groupSet.add(participantGroups.get(0));
+					break;
+
+				case 1:
+					groupSet.add(participantGroups.get(1));
+					break;
+
+				case 2:
+					groupSet.add(participantGroups.get(0));
+					groupSet.add(participantGroups.get(1));
+					break;
 			}
-			EventParticipants ep = new EventParticipants(counter.decrementAndGet(), event.getId(), null, groupSet);
+			EventParticipants ep = new EventParticipants(counter.decrementAndGet(), event.getId(), null,
+					groupSet);
 			uniEventParticipants.put(event.getId(), ep);
-			
-			
-			
+
 			// give each event a load shed target of 1kW
-			EventTargets et = new EventTargets(counter.decrementAndGet(), eventRule.getId(), 
+			EventTargets et = new EventTargets(counter.decrementAndGet(), eventRule.getId(),
 					new TreeSet<EventTarget>(Arrays.asList(new EventTarget(Duration.ZERO, 1000D))));
-			
+
 			addEvent(event, ep, et);
 			mdt.addWeeks(1);
 		}
 	}
 
 	@Override
-	public List<CapabilityInformation> getAllParticipantGroups(
-			List<SortDescriptor> sortDescriptor) {
+	public List<CapabilityInformation> getAllParticipantGroups(List<SortDescriptor> sortDescriptor) {
 		return Collections.unmodifiableList(participantGroups);
 	}
 
 	@Override
 	public Set<CapabilityInformation> getParticipantGroupMembers(Long groupId,
-			ObjectCriteria<ParticipantFilter> criteria,
-			List<SortDescriptor> sortDescriptors) {
+			ObjectCriteria<ParticipantFilter> criteria, List<SortDescriptor> sortDescriptors) {
 		Set<CapabilityInformation> members = participantGroupMemebers.get(groupId);
 		if ( members == null ) {
-			throw new SecurityException("Access denied for Group " +groupId);
+			throw new SecurityException("Access denied for Group " + groupId);
 		}
 		return members;
 	}
@@ -260,19 +254,18 @@ public class MockDRASObserverBiz implements DRASObserverBiz {
 	@Override
 	public Program getProgram(Long programId) {
 		if ( !uniProgram.getId().equals(programId) ) {
-			throw new SecurityException("Access denied for Program " +programId);
+			throw new SecurityException("Access denied for Program " + programId);
 		}
 		return uniProgram;
 	}
 
 	@Override
 	public Set<CapabilityInformation> getProgramParticipants(Program program,
-			ObjectCriteria<ParticipantFilter> criteria,
-			List<SortDescriptor> sortDescriptors) {
+			ObjectCriteria<ParticipantFilter> criteria, List<SortDescriptor> sortDescriptors) {
 		Set<CapabilityInformation> results = new LinkedHashSet<CapabilityInformation>(
 				uniProgramParticipants.size());
 		for ( Identity<Long> participant : uniProgramParticipants ) {
-			SolarNode node = (SolarNode)participant;
+			SolarNode node = (SolarNode) participant;
 			SimpleCapabilityInformation info = new SimpleCapabilityInformation();
 			info.setId(participant.getId());
 			info.setLocation(uniLocations.get(node.getLocationId()));
@@ -284,8 +277,7 @@ public class MockDRASObserverBiz implements DRASObserverBiz {
 	}
 
 	@Override
-	public List<Event> getEvents(Program program,
-			ObjectCriteria<EventFilter> criteria,
+	public List<Event> getEvents(Program program, ObjectCriteria<EventFilter> criteria,
 			List<SortDescriptor> sortDescriptors) {
 		return Collections.unmodifiableList(uniEvents);
 	}
@@ -297,7 +289,7 @@ public class MockDRASObserverBiz implements DRASObserverBiz {
 				return event;
 			}
 		}
-		throw new SecurityException("Access denied for Event " +eventId);
+		throw new SecurityException("Access denied for Event " + eventId);
 	}
 
 	@Override
@@ -307,13 +299,12 @@ public class MockDRASObserverBiz implements DRASObserverBiz {
 
 	@Override
 	public Set<CapabilityInformation> getEventParticipants(Event event,
-			ObjectCriteria<ParticipantFilter> criteria,
-			List<SortDescriptor> sortDescriptors) {
-		EventParticipants ep = getCurrentEventParticipants(event);	
+			ObjectCriteria<ParticipantFilter> criteria, List<SortDescriptor> sortDescriptors) {
+		EventParticipants ep = getCurrentEventParticipants(event);
 		Set<CapabilityInformation> results = new LinkedHashSet<CapabilityInformation>(numNodes);
 		if ( ep.getParticipants() != null ) {
 			for ( final Identity<Long> participant : ep.getParticipants() ) {
-				SolarNode node = (SolarNode)participant;
+				SolarNode node = (SolarNode) participant;
 				SimpleCapabilityInformation info = new SimpleCapabilityInformation();
 				info.setId(participant.getId());
 				info.setLocation(uniLocations.get(node.getLocationId()));
@@ -324,7 +315,8 @@ public class MockDRASObserverBiz implements DRASObserverBiz {
 		}
 		if ( ep.getGroups() != null ) {
 			for ( final Identity<Long> group : ep.getGroups() ) {
-				Set<CapabilityInformation> members = getParticipantGroupMembers(group.getId(), null, null);
+				Set<CapabilityInformation> members = getParticipantGroupMembers(group.getId(), null,
+						null);
 				results.addAll(members);
 			}
 		}
