@@ -171,8 +171,12 @@ public class MyBatisParticipantGroupDaoTest extends AbstractMyBatisDaoTestSuppor
 	public void getCapability() {
 		insertParticipantGroup();
 		setupTestCapability();
-		jdbcTemplate.update("UPDATE solardras.participant_group SET cap_id = ? WHERE id = ?",
+
+		int count = jdbcTemplate.update("UPDATE solardras.participant_group SET cap_id = ? WHERE id = ?",
 				TEST_CAPABILITY_ID, lastParticipantGroupId);
+		assertEquals(1, count);
+
+		clearSessionCache();
 
 		ParticipantGroup g = participantGroupDao.get(lastParticipantGroupId);
 		Capability capability = g.getCapability();

@@ -165,6 +165,8 @@ public class MyBatisParticipantDaoTest extends AbstractMyBatisDaoTestSupport {
 		jdbcTemplate.update("update solardras.participant SET cap_id = ? WHERE id = ?",
 				TEST_CAPABILITY_ID, lastParticipantId);
 
+		clearSessionCache();
+
 		Participant p = participantDao.get(lastParticipantId);
 		assertNotNull(p.getCapability());
 		assertEquals(TEST_CAPABILITY_ID, p.getCapability().getId());

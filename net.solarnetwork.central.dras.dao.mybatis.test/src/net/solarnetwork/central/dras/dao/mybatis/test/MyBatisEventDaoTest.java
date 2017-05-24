@@ -534,6 +534,8 @@ public class MyBatisEventDaoTest extends AbstractMyBatisDaoTestSupport {
 		// now add user to program, and search again, SHOULD find
 		assignUserToProgram(TEST_PROGRAM_ID, TEST_USER_ID, TEST_EFFECTIVE_ID);
 
+		clearSessionCache();
+
 		results = eventDao.findFiltered(filter, null, null, null);
 		assertNotNull(results);
 		assertEquals(1, results.getReturnedResultCount().intValue());
