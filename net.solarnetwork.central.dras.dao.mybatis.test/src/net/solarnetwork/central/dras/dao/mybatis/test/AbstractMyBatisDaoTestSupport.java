@@ -35,7 +35,9 @@ import org.joda.time.Duration;
 import org.joda.time.LocalTime;
 import org.joda.time.Period;
 import org.joda.time.ReadableDateTime;
+import org.junit.Assert;
 import org.junit.Before;
+import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import net.solarnetwork.central.domain.Identity;
@@ -83,14 +85,20 @@ public abstract class AbstractMyBatisDaoTestSupport extends AbstractCentralTrans
 	}
 
 	private SqlSessionFactory sqlSessionFactory;
+	private SqlSessionTemplate sqlSessionTemplate;
 
 	public SqlSessionFactory getSqlSessionFactory() {
 		return sqlSessionFactory;
 	}
 
+	protected SqlSessionTemplate getSqlSessionTemplate() {
+		return sqlSessionTemplate;
+	}
+
 	@Autowired
 	public void setSqlSessionFactory(SqlSessionFactory sqlSessionFactory) {
 		this.sqlSessionFactory = sqlSessionFactory;
+		sqlSessionTemplate = new SqlSessionTemplate(sqlSessionFactory);
 	}
 
 	/**
@@ -100,6 +108,16 @@ public abstract class AbstractMyBatisDaoTestSupport extends AbstractCentralTrans
 	public void setupInTransaction() {
 		setupTestUser();
 		setupTestEffective();
+	}
+
+	/**
+	 * Clear the session cache.
+	 * 
+	 * @param session
+	 *        the session to clear
+	 */
+	protected void clearSessionCache() {
+		sqlSessionTemplate.clearCache();
 	}
 
 	/**
@@ -212,8 +230,10 @@ public abstract class AbstractMyBatisDaoTestSupport extends AbstractCentralTrans
 	 * Insert a test capability into the solardras.capability table.
 	 */
 	protected void setupTestCapability() {
-		jdbcTemplate.update("insert into solardras.capability (id,dr_kind,max_power,max_energy,max_var) "
-				+ "values (?,?,?,?,?)", TEST_CAPABILITY_ID, "Test", 11, 12, 13);
+		int count = jdbcTemplate
+				.update("insert into solardras.capability (id,dr_kind,max_power,max_energy,max_var) "
+						+ "values (?,?,?,?,?)", TEST_CAPABILITY_ID, "Test", 11, 12, 13);
+		Assert.assertEquals("Inserted capability", 1, count);
 	}
 
 	/**
