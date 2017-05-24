@@ -3,7 +3,7 @@
 <mapper namespace="net.solarnetwork.central.dras.dao.mybatis.OutboundMail">
 	
 	<insert id="insert-OutboundMail" parameterType="OutboundMail">
-		<selectKey resultType="long" keyProperty="id" > 
+		<selectKey resultType="long" keyProperty="id" order="BEFORE"> 
               SELECT nextval('solardras.solardras_seq') AS id 
 		</selectKey>
 		INSERT INTO solardras.outbound_mail
