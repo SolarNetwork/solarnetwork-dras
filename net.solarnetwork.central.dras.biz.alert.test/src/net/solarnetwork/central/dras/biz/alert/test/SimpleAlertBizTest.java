@@ -18,8 +18,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 
  * 02111-1307 USA
  * ==================================================================
- * $Id$
- * ==================================================================
  */
 
 package net.solarnetwork.central.dras.biz.alert.test;
@@ -27,53 +25,72 @@ package net.solarnetwork.central.dras.biz.alert.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-
+import org.junit.Before;
+import org.junit.Test;
+import org.mybatis.spring.support.SqlSessionDaoSupport;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import net.solarnetwork.central.dras.biz.AlertBiz;
 import net.solarnetwork.central.dras.biz.AlertBiz.AlertProcessingResult;
 import net.solarnetwork.central.dras.biz.alert.SimpleAlertBiz;
 import net.solarnetwork.central.dras.dao.EventDao;
+import net.solarnetwork.central.dras.dao.OutboundMailDao;
 import net.solarnetwork.central.dras.dao.ProgramDao;
 import net.solarnetwork.central.dras.dao.UserDao;
-import net.solarnetwork.central.dras.dao.ibatis.test.AbstractIbatisDaoTestSupport;
+import net.solarnetwork.central.dras.dao.mybatis.MyBatisEventDao;
+import net.solarnetwork.central.dras.dao.mybatis.MyBatisOutboundMailDao;
+import net.solarnetwork.central.dras.dao.mybatis.MyBatisProgramDao;
+import net.solarnetwork.central.dras.dao.mybatis.MyBatisUserDao;
+import net.solarnetwork.central.dras.dao.mybatis.test.AbstractMyBatisDaoTestSupport;
 import net.solarnetwork.central.dras.domain.Event;
 import net.solarnetwork.central.dras.domain.User;
 import net.solarnetwork.central.dras.domain.UserContact;
 import net.solarnetwork.central.dras.domain.UserContact.ContactKind;
 import net.solarnetwork.central.dras.support.SimpleAlert;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.test.context.ContextConfiguration;
+import net.solarnetwork.central.test.CallingThreadExecutorService;
 
 /**
  * Test case for {@link SimpleAlertBiz}.
  * 
  * @author matt
- * @version $Revision$
+ * @version 1.0
  */
-@ContextConfiguration
-public class SimpleAlertBizTest extends AbstractIbatisDaoTestSupport {
+public class SimpleAlertBizTest extends AbstractMyBatisDaoTestSupport {
 
-	@Autowired private ProgramDao programDao;
-	@Autowired private EventDao eventDao;
-	@Autowired private UserDao userDao;
-	
-	@Autowired private SimpleAlertBiz alertBiz;
+	private EventDao eventDao;
+	private OutboundMailDao outboundMailDao;
+	private ProgramDao programDao;
+	private UserDao userDao;
+
+	private SimpleAlertBiz alertBiz;
 
 	@Before
 	public void setupSecurity() {
-		SecurityContextHolder.getContext().setAuthentication(
-                new UsernamePasswordAuthenticationToken(TEST_USERNAME, "unittest"));
+		eventDao = new MyBatisEventDao();
+		((SqlSessionDaoSupport) eventDao).setSqlSessionFactory(getSqlSessionFactory());
+		outboundMailDao = new MyBatisOutboundMailDao();
+		((SqlSessionDaoSupport) outboundMailDao).setSqlSessionFactory(getSqlSessionFactory());
+		programDao = new MyBatisProgramDao();
+		((SqlSessionDaoSupport) programDao).setSqlSessionFactory(getSqlSessionFactory());
+		userDao = new MyBatisUserDao();
+		((SqlSessionDaoSupport) userDao).setSqlSessionFactory(getSqlSessionFactory());
+
+		alertBiz = new SimpleAlertBiz();
+		alertBiz.setMailSender(new net.solarnetwork.central.mail.mock.MockMailSender());
+		alertBiz.setEventDao(eventDao);
+		alertBiz.setOutboundMailDao(outboundMailDao);
+		alertBiz.setProgramDao(programDao);
+		alertBiz.setUserDao(userDao);
+		alertBiz.setProcessor(new CallingThreadExecutorService());
+
+		SecurityContextHolder.getContext()
+				.setAuthentication(new UsernamePasswordAuthenticationToken(TEST_USERNAME, "unittest"));
 	}
 
 	private Event setupEvent() {
@@ -83,12 +100,12 @@ public class SimpleAlertBizTest extends AbstractIbatisDaoTestSupport {
 		contacts.add(new UserContact(ContactKind.EMAIL, "tester@localhost.localdomain", 1));
 		u.setContactInfo(contacts);
 		userDao.store(u);
-		
+
 		setupTestLocation();
 		setupTestProgram(TEST_PROGRAM_ID, TEST_PROGRAM_NAME);
 		setupTestParticipant();
 		setupTestEvent(TEST_EVENT_ID, TEST_PROGRAM_ID);
-		
+
 		// add participant to program
 		Set<Long> memberIds = new HashSet<Long>(1);
 		memberIds.add(TEST_PARTICIPANT_ID);
@@ -96,18 +113,18 @@ public class SimpleAlertBizTest extends AbstractIbatisDaoTestSupport {
 
 		// assign participant to event
 		eventDao.assignParticipantMembers(TEST_EVENT_ID, memberIds, TEST_EFFECTIVE_ID);
-		
+
 		return eventDao.get(TEST_EVENT_ID);
 	}
-	
+
 	@Test
 	public void processEventCreatedAlert() throws Exception {
 		Event event = setupEvent();
-		
+
 		SimpleAlert alert = new SimpleAlert();
 		alert.setAlertType(AlertBiz.ALERT_TYPE_ENTITY_CREATED);
 		alert.setRegardingIdentity(event);
-		
+
 		Future<AlertProcessingResult> future = alertBiz.postAlert(alert);
 		assertNotNull(future);
 		AlertProcessingResult result = future.get(1, TimeUnit.MINUTES);

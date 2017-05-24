@@ -18,8 +18,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 
  * 02111-1307 USA
  * ==================================================================
- * $Id$
- * ==================================================================
  */
 
 package net.solarnetwork.central.dras.biz.dao;
@@ -29,11 +27,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import net.solarnetwork.central.dao.GenericDao;
 import net.solarnetwork.central.dao.ObjectCriteria;
-import net.solarnetwork.central.dao.SortDescriptor;
 import net.solarnetwork.central.domain.FilterResults;
+import net.solarnetwork.central.domain.SortDescriptor;
 import net.solarnetwork.central.dras.biz.ParticipantAdminBiz;
 import net.solarnetwork.central.dras.biz.ParticipantBiz;
 import net.solarnetwork.central.dras.dao.CapabilityDao;
@@ -58,41 +59,41 @@ import net.solarnetwork.central.dras.support.CapableParticipantGroup;
 import net.solarnetwork.central.dras.support.MembershipCommand;
 import net.solarnetwork.util.ClassUtils;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-
 /**
- * DAO-based implementation of {@link ParticipantBiz} and {@link ParticipantAdminBiz}.
+ * DAO-based implementation of {@link ParticipantBiz} and
+ * {@link ParticipantAdminBiz}.
  * 
  * @author matt
- * @version $Revision$
+ * @version 1.1
  */
 @Service
-public class DaoParticipantBiz extends DaoBizSupport
-implements ParticipantBiz, ParticipantAdminBiz {
+public class DaoParticipantBiz extends DaoBizSupport implements ParticipantBiz, ParticipantAdminBiz {
 
 	private final CapabilityDao capabilityDao;
 	private final ParticipantDao participantDao;
 	private final ParticipantGroupDao participantGroupDao;
 	private final ConstraintDao constraintDao;
-	
+
 	/**
 	 * Constructor.
 	 * 
-	 * @param effectiveDao the EffectiveDao
-	 * @param userDao the UserDao
-	 * @param locationDao the LocationDao
-	 * @param participantDao the ParticipantDao
-	 * @param participantGroupDao the ParticipantGroupDao
-	 * @param constraintDao the ConstraintDao
+	 * @param effectiveDao
+	 *        the EffectiveDao
+	 * @param userDao
+	 *        the UserDao
+	 * @param locationDao
+	 *        the LocationDao
+	 * @param participantDao
+	 *        the ParticipantDao
+	 * @param participantGroupDao
+	 *        the ParticipantGroupDao
+	 * @param constraintDao
+	 *        the ConstraintDao
 	 */
 	@Autowired
-	public DaoParticipantBiz(EffectiveDao effectiveDao, UserDao userDao, 
-			CapabilityDao capabilityDao, LocationDao locationDao,
-			ParticipantDao participantDao, ParticipantGroupDao participantGroupDao,
-			ConstraintDao constraintDao) {
+	public DaoParticipantBiz(EffectiveDao effectiveDao, UserDao userDao, CapabilityDao capabilityDao,
+			LocationDao locationDao, ParticipantDao participantDao,
+			ParticipantGroupDao participantGroupDao, ConstraintDao constraintDao) {
 		this.capabilityDao = capabilityDao;
 		this.effectiveDao = effectiveDao;
 		this.userDao = userDao;
@@ -101,15 +102,13 @@ implements ParticipantBiz, ParticipantAdminBiz {
 		this.participantGroupDao = participantGroupDao;
 		this.constraintDao = constraintDao;
 	}
-	
+
 	@Override
 	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
-	public List<Match> findParticipants(
-			ObjectCriteria<ParticipantFilter> criteria,
+	public List<Match> findParticipants(ObjectCriteria<ParticipantFilter> criteria,
 			List<SortDescriptor> sortDescriptors) {
-		FilterResults<Match> matches = participantDao.findFiltered(
-				criteria.getSimpleFilter(), sortDescriptors,
-				criteria.getResultOffset(), criteria.getResultMax());
+		FilterResults<Match> matches = participantDao.findFiltered(criteria.getSimpleFilter(),
+				sortDescriptors, criteria.getResultOffset(), criteria.getResultMax());
 		List<Match> result = new ArrayList<Match>(matches.getReturnedResultCount().intValue());
 		for ( Match m : matches.getResults() ) {
 			result.add(m);
@@ -139,8 +138,7 @@ implements ParticipantBiz, ParticipantAdminBiz {
 
 	@Override
 	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
-	public CapableParticipantGroup getCapableParticipantGroup(
-			Long participantGroupId) {
+	public CapableParticipantGroup getCapableParticipantGroup(Long participantGroupId) {
 		ParticipantGroup g = participantGroupDao.get(participantGroupId);
 		if ( g == null ) {
 			return null;
@@ -154,12 +152,10 @@ implements ParticipantBiz, ParticipantAdminBiz {
 
 	@Override
 	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
-	public List<Match> findParticipantGroups(
-			ObjectCriteria<ParticipantGroupFilter> criteria,
+	public List<Match> findParticipantGroups(ObjectCriteria<ParticipantGroupFilter> criteria,
 			List<SortDescriptor> sortDescriptors) {
-		FilterResults<Match> matches = participantGroupDao.findFiltered(
-				criteria.getSimpleFilter(), sortDescriptors,
-				criteria.getResultOffset(), criteria.getResultMax());
+		FilterResults<Match> matches = participantGroupDao.findFiltered(criteria.getSimpleFilter(),
+				sortDescriptors, criteria.getResultOffset(), criteria.getResultMax());
 		List<Match> result = new ArrayList<Match>(matches.getReturnedResultCount().intValue());
 		for ( Match m : matches.getResults() ) {
 			result.add(m);
@@ -193,8 +189,7 @@ implements ParticipantBiz, ParticipantAdminBiz {
 
 	@Override
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-	public Capability storeParticipantCapability(
-			Long participantId, Capability template) {
+	public Capability storeParticipantCapability(Long participantId, Capability template) {
 		Participant p = participantDao.get(participantId);
 		if ( p == null ) {
 			return null;
@@ -204,8 +199,7 @@ implements ParticipantBiz, ParticipantAdminBiz {
 		ignore.add("id");
 		ignore.add("created");
 		if ( current != null ) {
-			Map<String, Object> currValues = ClassUtils.getBeanProperties(
-					current, ignore);
+			Map<String, Object> currValues = ClassUtils.getBeanProperties(current, ignore);
 			Map<String, Object> newValues = ClassUtils.getBeanProperties(template, ignore);
 			if ( currValues.equals(newValues) ) {
 				// nothing has changed, don't create new mapping
@@ -243,8 +237,7 @@ implements ParticipantBiz, ParticipantAdminBiz {
 
 	@Override
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-	public Capability storeParticipantGroupCapability(
-			Long participantGroupId, Capability template) {
+	public Capability storeParticipantGroupCapability(Long participantGroupId, Capability template) {
 		ParticipantGroup g = participantGroupDao.get(participantGroupId);
 		if ( g == null ) {
 			return null;
@@ -254,8 +247,7 @@ implements ParticipantBiz, ParticipantAdminBiz {
 		ignore.add("id");
 		ignore.add("created");
 		if ( current != null ) {
-			Map<String, Object> currValues = ClassUtils.getBeanProperties(
-					current, ignore);
+			Map<String, Object> currValues = ClassUtils.getBeanProperties(current, ignore);
 			Map<String, Object> newValues = ClassUtils.getBeanProperties(template, ignore);
 			if ( currValues.equals(newValues) ) {
 				// nothing has changed, don't create new mapping
@@ -275,36 +267,38 @@ implements ParticipantBiz, ParticipantAdminBiz {
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public EffectiveCollection<ParticipantGroup, Member> assignParticipantGroupMembers(
 			MembershipCommand membership) {
-		return maintainGroupMembership(membership, new MembershipMaintenance<ParticipantGroup, Member>() {
-			@Override
-			public GenericDao<ParticipantGroup, Long> getDao() {
-				return participantGroupDao;
-			}
-			
-			@Override
-			public Participant createMember(Long memberId) {
-				return new Participant(memberId);
-			}
+		return maintainGroupMembership(membership,
+				new MembershipMaintenance<ParticipantGroup, Member>() {
 
-			@Override
-			public Set<Member> getMembers(Long parentId, Effective eff) {
-				return participantGroupDao.getParticipantMembers(parentId, eff.getEffectiveDate());
-			}
-			
-			@Override
-			public void assignMembers(Long parentId, Set<Long> newMembers, Effective eff) {
-				participantGroupDao.assignParticipantMembers(parentId, newMembers, eff.getId());
-			}
+					@Override
+					public GenericDao<ParticipantGroup, Long> getDao() {
+						return participantGroupDao;
+					}
 
-		});
+					@Override
+					public Participant createMember(Long memberId) {
+						return new Participant(memberId);
+					}
+
+					@Override
+					public Set<Member> getMembers(Long parentId, Effective eff) {
+						return participantGroupDao.getParticipantMembers(parentId,
+								eff.getEffectiveDate());
+					}
+
+					@Override
+					public void assignMembers(Long parentId, Set<Long> newMembers, Effective eff) {
+						participantGroupDao.assignParticipantMembers(parentId, newMembers, eff.getId());
+					}
+
+				});
 	}
 
 	@Override
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public EffectiveCollection<Participant, Constraint> storeParticipantConstraints(
 			final Long participantId, final List<Constraint> constraints) {
-		List<Long> constraintIds = new ArrayList<Long>(
-				constraints == null ? 0 : constraints.size());
+		List<Long> constraintIds = new ArrayList<Long>(constraints == null ? 0 : constraints.size());
 		if ( constraints != null ) {
 			for ( Constraint c : constraints ) {
 				constraintIds.add(constraintDao.store(c));
@@ -331,8 +325,7 @@ implements ParticipantBiz, ParticipantAdminBiz {
 			}
 
 			@Override
-			public void assignMembers(Long parentId, Set<Long> newMembers,
-					Effective eff) {
+			public void assignMembers(Long parentId, Set<Long> newMembers, Effective eff) {
 				participantDao.assignConstraints(parentId, newMembers, eff.getId());
 			}
 		});
@@ -342,8 +335,7 @@ implements ParticipantBiz, ParticipantAdminBiz {
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public EffectiveCollection<Participant, Constraint> storeParticipantProgramConstraints(
 			final Long participantId, final Long programId, final List<Constraint> constraints) {
-		List<Long> constraintIds = new ArrayList<Long>(
-				constraints == null ? 0 : constraints.size());
+		List<Long> constraintIds = new ArrayList<Long>(constraints == null ? 0 : constraints.size());
 		if ( constraints != null ) {
 			for ( Constraint c : constraints ) {
 				constraintIds.add(constraintDao.store(c));
@@ -366,15 +358,14 @@ implements ParticipantBiz, ParticipantAdminBiz {
 
 			@Override
 			public Set<Constraint> getMembers(Long parentId, Effective eff) {
-				return participantDao.getParticipantProgramConstraints(parentId, 
-						programId, eff.getEffectiveDate());
+				return participantDao.getParticipantProgramConstraints(parentId, programId,
+						eff.getEffectiveDate());
 			}
 
 			@Override
-			public void assignMembers(Long parentId, Set<Long> newMembers,
-					Effective eff) {
-				participantDao.assignParticipantProgramConstraints(parentId, programId, 
-						newMembers, eff.getId());
+			public void assignMembers(Long parentId, Set<Long> newMembers, Effective eff) {
+				participantDao.assignParticipantProgramConstraints(parentId, programId, newMembers,
+						eff.getId());
 			}
 		});
 	}
@@ -387,8 +378,7 @@ implements ParticipantBiz, ParticipantAdminBiz {
 
 	@Override
 	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
-	public Set<Constraint> getParticipantProgramConstraints(Long participantId,
-			Long programId) {
+	public Set<Constraint> getParticipantProgramConstraints(Long participantId, Long programId) {
 		return participantDao.getParticipantProgramConstraints(participantId, programId, null);
 	}
 

@@ -18,8 +18,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 
  * 02111-1307 USA
  * ==================================================================
- * $Id$
- * ==================================================================
  */
 
 package net.solarnetwork.central.dras.aop;
@@ -40,7 +38,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
  * Support class for security-related aspects.
  * 
  * @author matt
- * @version $Revision$
+ * @version 1.0
  */
 public class SecurityAspectSupport {
 

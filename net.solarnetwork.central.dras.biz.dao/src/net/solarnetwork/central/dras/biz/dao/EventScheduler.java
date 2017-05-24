@@ -18,8 +18,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 
  * 02111-1307 USA
  * ==================================================================
- * $Id$
- * ==================================================================
  */
 
 package net.solarnetwork.central.dras.biz.dao;
@@ -45,7 +43,7 @@ import org.springframework.stereotype.Service;
  * publication of the event at the event date.
  * 
  * @author matt
- * @version $Revision$
+ * @version 1.0
  */
 @Service
 public class EventScheduler extends EventHandlerSupport {

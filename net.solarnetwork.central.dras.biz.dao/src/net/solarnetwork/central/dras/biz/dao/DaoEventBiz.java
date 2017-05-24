@@ -18,8 +18,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 
  * 02111-1307 USA
  * ==================================================================
- * $Id$
- * ==================================================================
  */
 
 package net.solarnetwork.central.dras.biz.dao;
@@ -27,11 +25,14 @@ package net.solarnetwork.central.dras.biz.dao;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import net.solarnetwork.central.dao.GenericDao;
 import net.solarnetwork.central.dao.ObjectCriteria;
-import net.solarnetwork.central.dao.SortDescriptor;
 import net.solarnetwork.central.domain.FilterResults;
+import net.solarnetwork.central.domain.SortDescriptor;
 import net.solarnetwork.central.dras.biz.EventAdminBiz;
 import net.solarnetwork.central.dras.biz.EventBiz;
 import net.solarnetwork.central.dras.dao.EffectiveDao;
@@ -48,26 +49,22 @@ import net.solarnetwork.central.dras.domain.ParticipantGroup;
 import net.solarnetwork.central.dras.support.MembershipCommand;
 import net.solarnetwork.util.ClassUtils;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-
 /**
  * DAO-based implementation of {@link EventBiz}.
  * 
  * @author matt
- * @version $Revision$
+ * @version 1.1
  */
 @Service
 public class DaoEventBiz extends DaoBizSupport implements EventBiz, EventAdminBiz {
 
 	private final EventDao eventDao;
-	
+
 	/**
 	 * Construct with values.
 	 * 
-	 * @param eventDao the EventDao
+	 * @param eventDao
+	 *        the EventDao
 	 */
 	@Autowired
 	public DaoEventBiz(EventDao eventDao, EffectiveDao effectiveDao, UserDao userDao) {
@@ -75,7 +72,7 @@ public class DaoEventBiz extends DaoBizSupport implements EventBiz, EventAdminBi
 		this.effectiveDao = effectiveDao;
 		this.userDao = userDao;
 	}
-	
+
 	@Override
 	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 	public Event getEvent(Long eventId) {
@@ -86,8 +83,7 @@ public class DaoEventBiz extends DaoBizSupport implements EventBiz, EventAdminBi
 	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 	public List<Match> findEvents(ObjectCriteria<EventFilter> criteria,
 			List<SortDescriptor> sortDescriptors) {
-		FilterResults<Match> matches =  eventDao.findFiltered(
-				criteria.getSimpleFilter(), sortDescriptors, 
+		FilterResults<Match> matches = eventDao.findFiltered(criteria.getSimpleFilter(), sortDescriptors,
 				criteria.getResultOffset(), criteria.getResultMax());
 		List<Match> result = new ArrayList<Match>(matches.getReturnedResultCount().intValue());
 		for ( Match m : matches.getResults() ) {
@@ -116,90 +112,87 @@ public class DaoEventBiz extends DaoBizSupport implements EventBiz, EventAdminBi
 	}
 
 	@Override
-	public EffectiveCollection<Event, Member> assignMembers(Long eventId,
-			MembershipCommand participants, MembershipCommand participantGroups) {
+	public EffectiveCollection<Event, Member> assignMembers(Long eventId, MembershipCommand participants,
+			MembershipCommand participantGroups) {
 		if ( eventId == null || (participants == null && participantGroups == null) ) {
 			return null;
 		}
-		
+
 		EffectiveCollection<Event, ? extends Member> parts = null;
 		if ( participants != null ) {
 			// create copies of input to mutate
-			MembershipCommand p = (MembershipCommand)participants.clone();
+			MembershipCommand p = (MembershipCommand) participants.clone();
 			p.setParentId(eventId);
-			
+
 			// assign participants
-			parts =  maintainGroupMembership(p, new MembershipMaintenance<Event, Member>() {
-	
+			parts = maintainGroupMembership(p, new MembershipMaintenance<Event, Member>() {
+
 				@Override
 				public GenericDao<Event, Long> getDao() {
 					return eventDao;
 				}
-	
+
 				@Override
 				public Member createMember(Long memberId) {
 					return new Participant(memberId);
 				}
-	
+
 				@Override
 				public Set<Member> getMembers(Long parentId, Effective eff) {
 					return eventDao.getParticipantMembers(parentId, eff.getEffectiveDate());
 				}
-	
+
 				@Override
-				public void assignMembers(Long parentId, Set<Long> newMembers,
-						Effective eff) {
+				public void assignMembers(Long parentId, Set<Long> newMembers, Effective eff) {
 					eventDao.assignParticipantMembers(parentId, newMembers, eff.getId());
 				}
-	
+
 			});
 		}
-		
+
 		EffectiveCollection<Event, ? extends Member> groups = null;
 		if ( participantGroups != null ) {
-			MembershipCommand g = (MembershipCommand)participantGroups.clone();
+			MembershipCommand g = (MembershipCommand) participantGroups.clone();
 			g.setParentId(eventId);
 			// using same Effective as for participants, assign participant groups
 			if ( parts != null && parts.getEffective() != null ) {
 				g.setEffectiveId(parts.getEffective().getId());
 			}
-			groups =  maintainGroupMembership(g, new MembershipMaintenance<Event, Member>() {
-	
+			groups = maintainGroupMembership(g, new MembershipMaintenance<Event, Member>() {
+
 				@Override
 				public GenericDao<Event, Long> getDao() {
 					return eventDao;
 				}
-	
+
 				@Override
 				public Member createMember(Long memberId) {
 					return new ParticipantGroup(memberId);
 				}
-	
+
 				@Override
 				public Set<Member> getMembers(Long parentId, Effective eff) {
 					return eventDao.getParticipantGroupMembers(parentId, eff.getEffectiveDate());
 				}
-	
+
 				@Override
-				public void assignMembers(Long parentId, Set<Long> newMembers,
-						Effective eff) {
+				public void assignMembers(Long parentId, Set<Long> newMembers, Effective eff) {
 					eventDao.assignParticipantGroupMembers(parentId, newMembers, eff.getId());
 				}
-	
+
 			});
 		}
-		
+
 		List<Member> combinedMembers = new ArrayList<Member>(
 				(parts == null ? 0 : parts.getCollection().size())
-				+(groups == null ? 0 : groups.getCollection().size())
-				+1);
+						+ (groups == null ? 0 : groups.getCollection().size()) + 1);
 		if ( parts != null ) {
 			combinedMembers.addAll(parts.getCollection());
 		}
 		if ( groups != null ) {
 			combinedMembers.addAll(groups.getCollection());
 		}
-		
+
 		EffectiveCollection<Event, Member> result = new EffectiveCollection<Event, Member>(
 				parts.getEffective(), parts.getObject(), combinedMembers);
 		return result;

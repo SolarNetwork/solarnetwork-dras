@@ -18,8 +18,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 
  * 02111-1307 USA
  * ==================================================================
- * $Id$
- * ==================================================================
  */
 
 package net.solarnetwork.central.dras.aop;
@@ -47,7 +45,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * Aspect for publishing OSGi Event Admin events.
  * 
  * @author matt
- * @version $Revision$
+ * @version 1.0
  */
 @Aspect
 public class EntityChangeNotificationAspect extends SecurityAspectSupport {

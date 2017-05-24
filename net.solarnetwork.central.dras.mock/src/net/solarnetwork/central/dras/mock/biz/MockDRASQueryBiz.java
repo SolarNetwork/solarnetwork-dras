@@ -18,8 +18,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 
  * 02111-1307 USA
  * ==================================================================
- * $Id$
- * ==================================================================
  */
 
 package net.solarnetwork.central.dras.mock.biz;
@@ -47,7 +45,7 @@ import org.joda.time.ReadableInterval;
  * Mock implementation of QueryBiz that supports the {@link MockDRASObserverBiz}.
  * 
  * @author matt
- * @version $Revision$
+ * @version 1.0
  */
 public class MockDRASQueryBiz implements QueryBiz {
 	

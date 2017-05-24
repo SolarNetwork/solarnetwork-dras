@@ -18,8 +18,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 
  * 02111-1307 USA
  * ==================================================================
- * $Id$
- * ==================================================================
  */
 
 package net.solarnetwork.central.dras.web;
@@ -45,7 +43,7 @@ import org.apache.commons.collections.list.LazyList;
  * APIs can always pass {@code eventId}.</p>
  * 
  * @author matt
- * @version $Revision$
+ * @version 1.0
  */
 public class ParticipantsCommand {
 

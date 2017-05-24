@@ -18,8 +18,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 
  * 02111-1307 USA
  * ==================================================================
- * $Id$
- * ==================================================================
  */
 
 package net.solarnetwork.central.dras.biz.dao;
@@ -50,7 +48,7 @@ import org.springframework.transaction.support.TransactionTemplate;
  * Publish an event to a EventExecutor service.
  * 
  * @author matt
- * @version $Revision$
+ * @version 1.0
  */
 @Service
 public class EventPublisher extends JobSupport {

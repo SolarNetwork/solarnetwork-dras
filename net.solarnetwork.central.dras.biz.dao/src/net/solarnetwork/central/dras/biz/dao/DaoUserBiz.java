@@ -18,8 +18,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 
  * 02111-1307 USA
  * ==================================================================
- * $Id$
- * ==================================================================
  */
 
 package net.solarnetwork.central.dras.biz.dao;
@@ -29,11 +27,15 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-
+import org.apache.commons.codec.digest.DigestUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import net.solarnetwork.central.dao.GenericDao;
 import net.solarnetwork.central.dao.ObjectCriteria;
-import net.solarnetwork.central.dao.SortDescriptor;
 import net.solarnetwork.central.domain.FilterResults;
+import net.solarnetwork.central.domain.SortDescriptor;
 import net.solarnetwork.central.dras.biz.UserAdminBiz;
 import net.solarnetwork.central.dras.biz.UserBiz;
 import net.solarnetwork.central.dras.dao.ConstraintDao;
@@ -56,17 +58,11 @@ import net.solarnetwork.central.dras.support.SimpleProgramFilter;
 import net.solarnetwork.central.dras.support.UserInformation;
 import net.solarnetwork.util.ClassUtils;
 
-import org.apache.commons.codec.digest.DigestUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-
 /**
  * DAO-based implementation of {@link UserBiz} and {@link UserAdminBiz}.
  * 
  * @author matt
- * @version $Revision$
+ * @version 1.1
  */
 @Service
 public class DaoUserBiz extends DaoBizSupport implements UserBiz, UserAdminBiz {
@@ -74,26 +70,31 @@ public class DaoUserBiz extends DaoBizSupport implements UserBiz, UserAdminBiz {
 	private final ProgramDao programDao;
 	private final UserGroupDao userGroupDao;
 	private final ConstraintDao constraintDao;
-	
+
 	/**
 	 * Construct with values.
 	 * 
-	 * @param effectiveDao the EffectiveDao
-	 * @param programDao the ProgramDao
-	 * @param userDao the UserDao
-	 * @param userGroupDao the UserGroupDao
-	 * @param constraintDao the ConstraintDao
+	 * @param effectiveDao
+	 *        the EffectiveDao
+	 * @param programDao
+	 *        the ProgramDao
+	 * @param userDao
+	 *        the UserDao
+	 * @param userGroupDao
+	 *        the UserGroupDao
+	 * @param constraintDao
+	 *        the ConstraintDao
 	 */
 	@Autowired
-	public DaoUserBiz(EffectiveDao effectiveDao, ProgramDao programDao, 
-			UserDao userDao, UserGroupDao userGroupDao, ConstraintDao constraintDao) {
+	public DaoUserBiz(EffectiveDao effectiveDao, ProgramDao programDao, UserDao userDao,
+			UserGroupDao userGroupDao, ConstraintDao constraintDao) {
 		this.effectiveDao = effectiveDao;
 		this.programDao = programDao;
 		this.userDao = userDao;
 		this.userGroupDao = userGroupDao;
 		this.constraintDao = constraintDao;
 	}
-	
+
 	@Override
 	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 	public Set<UserRole> getAllUserRoles() {
@@ -110,11 +111,11 @@ public class DaoUserBiz extends DaoBizSupport implements UserBiz, UserAdminBiz {
 	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 	public UserInformation getUserInfo(Long userId) {
 		// TODO move this logic into single DAO call
-		
+
 		UserInformation info = new UserInformation();
 		info.setUser(userDao.get(userId));
 		info.setRoles(userDao.getUserRoles(userId));
-		
+
 		SimpleProgramFilter filter = new SimpleProgramFilter();
 		filter.setUserId(userId);
 		FilterResults<Match> programs = programDao.findFiltered(filter, null, null, null);
@@ -136,8 +137,7 @@ public class DaoUserBiz extends DaoBizSupport implements UserBiz, UserAdminBiz {
 	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 	public List<Match> findUsers(ObjectCriteria<UserFilter> criteria,
 			List<SortDescriptor> sortDescriptors) {
-		FilterResults<Match> matches = userDao.findFiltered(
-				criteria.getSimpleFilter(), sortDescriptors,
+		FilterResults<Match> matches = userDao.findFiltered(criteria.getSimpleFilter(), sortDescriptors,
 				criteria.getResultOffset(), criteria.getResultMax());
 		List<Match> result = new ArrayList<Match>(matches.getReturnedResultCount().intValue());
 		for ( Match m : matches.getResults() ) {
@@ -154,12 +154,10 @@ public class DaoUserBiz extends DaoBizSupport implements UserBiz, UserAdminBiz {
 
 	@Override
 	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
-	public List<Match> findUserGroups(
-			ObjectCriteria<UserGroupFilter> criteria,
+	public List<Match> findUserGroups(ObjectCriteria<UserGroupFilter> criteria,
 			List<SortDescriptor> sortDescriptors) {
-		FilterResults<Match> matches = userGroupDao.findFiltered(
-				criteria.getSimpleFilter(), sortDescriptors,
-				criteria.getResultOffset(), criteria.getResultMax());
+		FilterResults<Match> matches = userGroupDao.findFiltered(criteria.getSimpleFilter(),
+				sortDescriptors, criteria.getResultOffset(), criteria.getResultMax());
 		List<Match> result = new ArrayList<Match>(matches.getReturnedResultCount().intValue());
 		for ( Match m : matches.getResults() ) {
 			result.add(m);
@@ -176,7 +174,7 @@ public class DaoUserBiz extends DaoBizSupport implements UserBiz, UserAdminBiz {
 		} else {
 			entity = new User();
 		}
-		
+
 		boolean changedPassword = false;
 		if ( entity.getPassword() != null && template.getPassword() != null ) {
 			String digest = DigestUtils.sha256Hex(template.getPassword());
@@ -194,7 +192,7 @@ public class DaoUserBiz extends DaoBizSupport implements UserBiz, UserAdminBiz {
 		if ( changedPassword ) {
 			entity.setPassword(DigestUtils.sha256Hex(entity.getPassword()));
 		}
-		
+
 		Long newUserId = userDao.store(entity);
 		userDao.assignUserRoles(newUserId, roles);
 		if ( programs != null ) {
@@ -202,7 +200,7 @@ public class DaoUserBiz extends DaoBizSupport implements UserBiz, UserAdminBiz {
 			boolean updated = false;
 			for ( Long programId : programs ) {
 				Set<Member> members = programDao.getUserMembers(programId, null);
-				Set<Long> newMembers = new HashSet<Long>(members.size()+1);
+				Set<Long> newMembers = new HashSet<Long>(members.size() + 1);
 				for ( Member m : members ) {
 					newMembers.add(m.getId());
 				}
@@ -226,17 +224,18 @@ public class DaoUserBiz extends DaoBizSupport implements UserBiz, UserAdminBiz {
 		// TODO Auto-generated method stub
 		return null;
 	}
-	
+
 	@Override
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
 	public EffectiveCollection<UserGroup, Member> assignUserGroupMembers(
 			final MembershipCommand membership) {
 		return maintainGroupMembership(membership, new MembershipMaintenance<UserGroup, Member>() {
+
 			@Override
 			public GenericDao<UserGroup, Long> getDao() {
 				return userGroupDao;
 			}
-			
+
 			@Override
 			public Member createMember(Long memberId) {
 				return new User(memberId);
@@ -246,7 +245,7 @@ public class DaoUserBiz extends DaoBizSupport implements UserBiz, UserAdminBiz {
 			public Set<Member> getMembers(Long parentId, Effective eff) {
 				return userGroupDao.getMembers(parentId, eff.getEffectiveDate());
 			}
-			
+
 			@Override
 			public void assignMembers(Long parentId, Set<Long> newMembers, Effective eff) {
 				userGroupDao.assignMembers(parentId, newMembers, eff.getId());
@@ -257,10 +256,9 @@ public class DaoUserBiz extends DaoBizSupport implements UserBiz, UserAdminBiz {
 
 	@Override
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-	public EffectiveCollection<User, Constraint> storeUserConstraints(
-			final Long userId, final List<Constraint> constraints) {
-		List<Long> constraintIds = new ArrayList<Long>(
-				constraints == null ? 0 : constraints.size());
+	public EffectiveCollection<User, Constraint> storeUserConstraints(final Long userId,
+			final List<Constraint> constraints) {
+		List<Long> constraintIds = new ArrayList<Long>(constraints == null ? 0 : constraints.size());
 		if ( constraints != null ) {
 			for ( Constraint c : constraints ) {
 				constraintIds.add(constraintDao.store(c));
@@ -270,7 +268,7 @@ public class DaoUserBiz extends DaoBizSupport implements UserBiz, UserAdminBiz {
 		membership.setParentId(userId);
 		membership.setGroup(constraintIds);
 		return maintainGroupMembership(membership, new MembershipMaintenance<User, Constraint>() {
-			
+
 			@Override
 			public GenericDao<User, Long> getDao() {
 				return userDao;
@@ -287,8 +285,7 @@ public class DaoUserBiz extends DaoBizSupport implements UserBiz, UserAdminBiz {
 			}
 
 			@Override
-			public void assignMembers(Long parentId, Set<Long> newMembers,
-					Effective eff) {
+			public void assignMembers(Long parentId, Set<Long> newMembers, Effective eff) {
 				userDao.assignConstraints(parentId, newMembers, eff.getId());
 			}
 		});
@@ -296,10 +293,9 @@ public class DaoUserBiz extends DaoBizSupport implements UserBiz, UserAdminBiz {
 
 	@Override
 	@Transactional(readOnly = false, propagation = Propagation.REQUIRED)
-	public EffectiveCollection<User, Constraint> storeUserProgramConstraints(
-			final Long userId, final Long programId, final List<Constraint> constraints) {
-		List<Long> constraintIds = new ArrayList<Long>(
-				constraints == null ? 0 : constraints.size());
+	public EffectiveCollection<User, Constraint> storeUserProgramConstraints(final Long userId,
+			final Long programId, final List<Constraint> constraints) {
+		List<Long> constraintIds = new ArrayList<Long>(constraints == null ? 0 : constraints.size());
 		if ( constraints != null ) {
 			for ( Constraint c : constraints ) {
 				constraintIds.add(constraintDao.store(c));
@@ -309,7 +305,7 @@ public class DaoUserBiz extends DaoBizSupport implements UserBiz, UserAdminBiz {
 		membership.setParentId(userId);
 		membership.setGroup(constraintIds);
 		return maintainGroupMembership(membership, new MembershipMaintenance<User, Constraint>() {
-			
+
 			@Override
 			public GenericDao<User, Long> getDao() {
 				return userDao;
@@ -326,8 +322,7 @@ public class DaoUserBiz extends DaoBizSupport implements UserBiz, UserAdminBiz {
 			}
 
 			@Override
-			public void assignMembers(Long parentId, Set<Long> newMembers,
-					Effective eff) {
+			public void assignMembers(Long parentId, Set<Long> newMembers, Effective eff) {
 				userDao.assignUserProgramConstraints(parentId, programId, newMembers, eff.getId());
 			}
 		});
@@ -341,8 +336,7 @@ public class DaoUserBiz extends DaoBizSupport implements UserBiz, UserAdminBiz {
 
 	@Override
 	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
-	public Set<Constraint> getUserProgramConstraints(
-			Long userId, Long programId) {
+	public Set<Constraint> getUserProgramConstraints(Long userId, Long programId) {
 		return userDao.getUserProgramConstraints(userId, programId, null);
 	}
 

@@ -18,18 +18,19 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 
  * 02111-1307 USA
  * ==================================================================
- * $Id$
- * ==================================================================
  */
 
 package net.solarnetwork.central.dras.biz.dao;
 
 import java.util.ArrayList;
 import java.util.List;
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import net.solarnetwork.central.dao.ObjectCriteria;
-import net.solarnetwork.central.dao.SortDescriptor;
 import net.solarnetwork.central.domain.FilterResults;
+import net.solarnetwork.central.domain.SortDescriptor;
 import net.solarnetwork.central.dras.biz.LocationAdminBiz;
 import net.solarnetwork.central.dras.biz.LocationBiz;
 import net.solarnetwork.central.dras.dao.LocationDao;
@@ -38,26 +39,22 @@ import net.solarnetwork.central.dras.domain.Location;
 import net.solarnetwork.central.dras.domain.Match;
 import net.solarnetwork.util.ClassUtils;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-
 /**
  * DAO-based implementation of {@link LocationBiz}.
  * 
  * @author matt
- * @version $Revision$
+ * @version 1.1
  */
 @Service
 public class DaoLocationBiz implements LocationBiz, LocationAdminBiz {
-	
-	private LocationDao locationDao;
-	
+
+	private final LocationDao locationDao;
+
 	/**
 	 * Construct with values.
 	 * 
-	 * @param locationDao the LocationDao
+	 * @param locationDao
+	 *        the LocationDao
 	 */
 	@Autowired
 	public DaoLocationBiz(LocationDao locationDao) {
@@ -74,9 +71,8 @@ public class DaoLocationBiz implements LocationBiz, LocationAdminBiz {
 	@Transactional(readOnly = true, propagation = Propagation.REQUIRED)
 	public List<Match> findLocations(ObjectCriteria<LocationFilter> criteria,
 			List<SortDescriptor> sortDescriptors) {
-		FilterResults<Match> matches =  locationDao.findFiltered(
-				criteria.getSimpleFilter(), sortDescriptors, 
-				criteria.getResultOffset(), criteria.getResultMax());
+		FilterResults<Match> matches = locationDao.findFiltered(criteria.getSimpleFilter(),
+				sortDescriptors, criteria.getResultOffset(), criteria.getResultMax());
 		List<Match> result = new ArrayList<Match>(matches.getReturnedResultCount().intValue());
 		for ( Match m : matches.getResults() ) {
 			result.add(m);
@@ -94,7 +90,7 @@ public class DaoLocationBiz implements LocationBiz, LocationAdminBiz {
 			entity = new Location();
 		}
 		ClassUtils.copyBeanProperties(template, entity, null);
-		
+
 		Long newLocationId = locationDao.store(entity);
 		return locationDao.get(newLocationId);
 	}

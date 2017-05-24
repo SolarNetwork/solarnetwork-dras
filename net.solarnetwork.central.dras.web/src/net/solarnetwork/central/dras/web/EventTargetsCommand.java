@@ -18,8 +18,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 
  * 02111-1307 USA
  * ==================================================================
- * $Id$
- * ==================================================================
  */
 
 package net.solarnetwork.central.dras.web;
@@ -38,7 +36,7 @@ import net.solarnetwork.central.dras.domain.EventTarget;
  * <p>The targets property uses a {@link LazyList} to help with Spring binding.</p>
  * 
  * @author matt
- * @version $Revision$
+ * @version 1.0
  */
 public class EventTargetsCommand {
 	
