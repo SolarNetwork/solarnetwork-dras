@@ -29,6 +29,9 @@
 
 	<context-param>
 		<param-name>contextClass</param-name>
+		<!-- NOTE: the NonValidating context fails to start because of XML Schema default values 
+			that Spring WebFlow is depending on.
+		 -->
 		<param-value>org.eclipse.virgo.web.dm.ServerOsgiBundleXmlWebApplicationContext</param-value>
 	</context-param>
 	

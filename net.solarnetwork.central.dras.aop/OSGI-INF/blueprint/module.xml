@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:osgix="http://www.eclipse.org/gemini/blueprint/schema/blueprint-compendium"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:ctx="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="
+		http://www.osgi.org/xmlns/blueprint/v1.0.0
+		http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd
+		http://www.eclipse.org/gemini/blueprint/schema/blueprint-compendium
+		http://www.eclipse.org/gemini/blueprint/schema/blueprint-compendium/gemini-blueprint-compendium.xsd
+		http://www.springframework.org/schema/aop
+		http://www.springframework.org/schema/aop/spring-aop-4.2.xsd
+		http://www.springframework.org/schema/beans
+		http://www.springframework.org/schema/beans/spring-beans-4.2.xsd
+		http://www.springframework.org/schema/context
+		http://www.springframework.org/schema/context/spring-context-4.2.xsd
+		http://www.springframework.org/schema/tx
+		http://www.springframework.org/schema/tx/spring-tx-4.2.xsd">
+	
+	<!-- Service References -->
+
+	<reference id="alertBiz" interface="net.solarnetwork.central.dras.biz.AlertBiz"/>
+	<reference id="userDao" interface="net.solarnetwork.central.dras.dao.UserDao"/>
+	<reference id="eventAdmin" interface="org.osgi.service.event.EventAdmin"/>
+
+	<reference id="eventBiz" 
+		interface="net.solarnetwork.central.dras.biz.EventBiz" 
+		availability="optional" 
+		filter="(!(aop=true))"/>
+	
+	<reference id="eventAdminBiz" 
+		interface="net.solarnetwork.central.dras.biz.EventAdminBiz" 
+		availability="optional" 
+		filter="(!(aop=true))"/>
+	
+	<reference id="participantBiz" 
+		interface="net.solarnetwork.central.dras.biz.ParticipantBiz" 
+		availability="optional" 
+		filter="(!(aop=true))"/>
+	
+	<reference id="programBiz" 
+		interface="net.solarnetwork.central.dras.biz.ProgramBiz" 
+		availability="optional" 
+		filter="(!(aop=true))"/>
+	
+	<reference id="programAdminBiz" 
+		interface="net.solarnetwork.central.dras.biz.ProgramAdminBiz" 
+		availability="optional" 
+		filter="(!(aop=true))"/>
+	
+	<reference id="userBiz" 
+		interface="net.solarnetwork.central.dras.biz.UserBiz" 
+		availability="optional" 
+		filter="(!(aop=true))"/>
+	
+	<!-- Published Services -->
+
+	<service ref="aopEventBiz" 
+		interface="net.solarnetwork.central.dras.biz.EventBiz"
+		ranking="10">
+		<service-properties>
+			<entry key="aop" value="true"/>
+		</service-properties>
+	</service>
+
+	<service ref="aopEventAdminBiz" 
+		interface="net.solarnetwork.central.dras.biz.EventAdminBiz"
+		ranking="10">
+		<service-properties>
+			<entry key="aop" value="true"/>
+		</service-properties>
+	</service>
+
+	<service ref="aopParticipantBiz" 
+		interface="net.solarnetwork.central.dras.biz.ParticipantBiz"
+		ranking="10">
+		<service-properties>
+			<entry key="aop" value="true"/>
+		</service-properties>
+	</service>
+
+	<service ref="aopProgramBiz" 
+		interface="net.solarnetwork.central.dras.biz.ProgramBiz"
+		ranking="10">
+		<service-properties>
+			<entry key="aop" value="true"/>
+		</service-properties>
+	</service>
+
+	<service ref="aopProgramAdminBiz" 
+		interface="net.solarnetwork.central.dras.biz.ProgramAdminBiz"
+		ranking="10">
+		<service-properties>
+			<entry key="aop" value="true"/>
+		</service-properties>
+	</service>
+
+	<service ref="aopUserBiz" 
+		interface="net.solarnetwork.central.dras.biz.UserBiz"
+		ranking="10">
+		<service-properties>
+			<entry key="aop" value="true"/>
+		</service-properties>
+	</service>
+
+	<!-- Supporting Services -->
+
+	<aop:aspectj-autoproxy/>
+	
+	<bean id="entityChangeNotificationAspect"
+		class="net.solarnetwork.central.dras.aop.EntityChangeNotificationAspect">
+		<argument ref="eventAdmin"/>
+		<argument ref="userDao"/>
+	</bean>
+	
+	<bean id="filterSecurityAspect" class="net.solarnetwork.central.dras.aop.FilterSecurityAspect">
+		<argument ref="userDao"/>
+	</bean>
+	
+	<bean id="aopEventBiz"
+		class="net.solarnetwork.central.dras.biz.support.DelegatingEventBiz">
+		<argument ref="eventBiz"/>
+	</bean>
+	
+	<bean id="aopEventAdminBiz"
+		class="net.solarnetwork.central.dras.biz.support.DelegatingEventAdminBiz">
+		<argument ref="eventAdminBiz"/>
+	</bean>
+	
+	<bean id="aopParticipantBiz"
+		class="net.solarnetwork.central.dras.biz.support.DelegatingParticipantBiz">
+		<argument ref="participantBiz"/>
+	</bean>
+	
+	<bean id="aopProgramBiz"
+		class="net.solarnetwork.central.dras.biz.support.DelegatingProgramBiz">
+		<argument ref="programBiz"/>
+	</bean>
+	
+	<bean id="aopProgramAdminBiz"
+		class="net.solarnetwork.central.dras.biz.support.DelegatingProgramAdminBiz">
+		<argument ref="programAdminBiz"/>
+	</bean>
+	
+	<bean id="aopUserBiz"
+		class="net.solarnetwork.central.dras.biz.support.DelegatingUserBiz">
+		<argument ref="userBiz"/>
+	</bean>
+	
+</blueprint>

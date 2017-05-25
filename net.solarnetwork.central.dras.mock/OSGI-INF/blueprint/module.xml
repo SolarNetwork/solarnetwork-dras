@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:ctx="http://www.springframework.org/schema/context"
+	xmlns:beans="http://www.springframework.org/schema/beans"
+	xsi:schemaLocation="
+		http://www.osgi.org/xmlns/blueprint/v1.0.0
+		http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd">
+	
+	<!-- Published Services -->
+	
+	<service ref="drasObserverBiz" 
+		interface="net.solarnetwork.central.dras.biz.DRASObserverBiz"
+		ranking="-1"/>
+	
+	<service ref="drasOperatorBiz" 
+		interface="net.solarnetwork.central.dras.biz.DRASOperatorBiz"
+		ranking="-1"/>
+	
+	<service ref="drasQueryBiz" 
+		interface="net.solarnetwork.central.query.biz.QueryBiz"
+		ranking="-1"/>
+
+	<!-- Supporting Services -->
+	
+	<bean id="drasObserverBiz"
+		class="net.solarnetwork.central.dras.mock.biz.MockDRASObserverBiz"/>
+	
+	<bean id="drasOperatorBiz"
+		class="net.solarnetwork.central.dras.mock.biz.MockDRASOperatorBiz">
+		<property name="mockObserverBiz" ref="drasObserverBiz"/>
+	</bean>
+	
+	<bean id="drasQueryBiz"
+		class="net.solarnetwork.central.dras.mock.biz.MockDRASQueryBiz">
+		<argument ref="drasObserverBiz"/>
+	</bean>
+	
+</blueprint>

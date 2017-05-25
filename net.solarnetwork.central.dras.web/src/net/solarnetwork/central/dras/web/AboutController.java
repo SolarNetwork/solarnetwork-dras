@@ -26,42 +26,40 @@ import java.util.Dictionary;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
-
-import net.solarnetwork.web.support.WebUtils;
-
+import org.eclipse.gemini.blueprint.context.BundleContextAware;
 import org.osgi.framework.BundleContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
-import org.springframework.osgi.context.BundleContextAware;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import net.solarnetwork.web.support.WebUtils;
 
 /**
  * Controller for application details.
  * 
  * @author matt
- * @version 1.0
+ * @version 1.1
  */
 @Controller
 @RequestMapping("/about")
 public class AboutController extends ControllerSupport implements BundleContextAware {
 
-	private static final String[] DEFAULT_KEYS
-	= new String[] {"Bundle-Name", "Bundle-SymbolicName", "Bundle-Version"};
+	private static final String[] DEFAULT_KEYS = new String[] { "Bundle-Name", "Bundle-SymbolicName",
+			"Bundle-Version" };
 
 	private BundleContext bundleContext;
-	
-	@Autowired private MessageSource messageSource;
-	
+
+	@Autowired
+	private MessageSource messageSource;
+
 	@Override
 	public void setBundleContext(BundleContext bundleContext) {
 		this.bundleContext = bundleContext;
 	}
-	
+
 	@ModelAttribute("app")
 	public Map<String, Object> getApplicationDetails(Locale locale) {
 		Map<String, Object> result = new LinkedHashMap<String, Object>(5);
@@ -72,7 +70,7 @@ public class AboutController extends ControllerSupport implements BundleContextA
 				Map<String, Object> value = new LinkedHashMap<String, Object>(2);
 				value.put("value", val);
 				if ( messageSource != null ) {
-					String msg = messageSource.getMessage("about.field."+key, null, locale);
+					String msg = messageSource.getMessage("about.field." + key, null, locale);
 					value.put("title", msg);
 				}
 				result.put(key, value);
@@ -80,7 +78,7 @@ public class AboutController extends ControllerSupport implements BundleContextA
 		}
 		return result;
 	}
-	
+
 	@RequestMapping(method = RequestMethod.GET, value = "/app.*")
 	public String version(HttpServletRequest request) {
 		return WebUtils.resolveViewFromUrlExtension(request, getViewName());

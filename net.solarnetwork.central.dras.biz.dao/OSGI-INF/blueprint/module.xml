@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:osgix="http://www.eclipse.org/gemini/blueprint/schema/blueprint-compendium"
+	xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:ctx="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="
+		http://www.osgi.org/xmlns/blueprint/v1.0.0
+		http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd
+		http://www.eclipse.org/gemini/blueprint/schema/blueprint-compendium
+		http://www.eclipse.org/gemini/blueprint/schema/blueprint-compendium/gemini-blueprint-compendium.xsd
+		http://www.springframework.org/schema/beans
+		http://www.springframework.org/schema/beans/spring-beans-4.2.xsd
+		http://www.springframework.org/schema/context
+		http://www.springframework.org/schema/context/spring-context-4.2.xsd
+		http://www.springframework.org/schema/tx
+		http://www.springframework.org/schema/tx/spring-tx-4.2.xsd">
+	
+	<!-- Service References -->
+	
+	<reference id="txManager" interface="org.springframework.transaction.PlatformTransactionManager"
+		filter="(db=central)"/>
+	
+	<reference id="eventAdmin" interface="org.osgi.service.event.EventAdmin"/>
+
+	<reference id="eventExecutor"
+		interface="net.solarnetwork.central.dras.biz.EventExecutor" availability="optional">
+		<reference-listener bind-method="onBind" unbind-method="onUnbind" ref="optionalEventExecutor"/>
+	</reference>
+
+ 	<reference id="capabilityDao" interface="net.solarnetwork.central.dras.dao.CapabilityDao"/>
+	<reference id="constraintDao" interface="net.solarnetwork.central.dras.dao.ConstraintDao"/>
+	<reference id="effectiveDao" interface="net.solarnetwork.central.dras.dao.EffectiveDao"/>
+	<reference id="eventDao" interface="net.solarnetwork.central.dras.dao.EventDao"/>
+	<reference id="eventExecutionInfoDao" interface="net.solarnetwork.central.dras.dao.EventExecutionInfoDao"/>
+	<reference id="locationDao" interface="net.solarnetwork.central.dras.dao.LocationDao"/>
+	<reference id="participantDao" interface="net.solarnetwork.central.dras.dao.ParticipantDao"/>
+	<reference id="participantGroupDao" interface="net.solarnetwork.central.dras.dao.ParticipantGroupDao"/>
+	<reference id="programDao" interface="net.solarnetwork.central.dras.dao.ProgramDao"/>
+	<reference id="userDao" interface="net.solarnetwork.central.dras.dao.UserDao"/>
+	<reference id="userGroupDao" interface="net.solarnetwork.central.dras.dao.UserGroupDao"/>
+	
+	<!-- Published Services -->
+	
+	<service ref="daoEventBiz" 
+		interface="net.solarnetwork.central.dras.biz.EventBiz"
+		ranking="1"/>
+	
+	<service ref="daoEventBiz" 
+		interface="net.solarnetwork.central.dras.biz.EventAdminBiz"
+		ranking="1"/>
+	
+	<service ref="daoLocationBiz" 
+		interface="net.solarnetwork.central.dras.biz.LocationBiz"
+		ranking="1"/>
+	
+	<service ref="daoLocationBiz" 
+		interface="net.solarnetwork.central.dras.biz.LocationAdminBiz"
+		ranking="1"/>
+	
+	<service ref="daoParticipantBiz" 
+		interface="net.solarnetwork.central.dras.biz.ParticipantBiz"
+		ranking="1"/>
+	
+	<service ref="daoParticipantBiz" 
+		interface="net.solarnetwork.central.dras.biz.ParticipantAdminBiz"
+		ranking="1"/>
+	
+	<service ref="daoProgramBiz" 
+		interface="net.solarnetwork.central.dras.biz.ProgramBiz"
+		ranking="1"/>
+	
+	<service ref="daoProgramBiz" 
+		interface="net.solarnetwork.central.dras.biz.ProgramAdminBiz"
+		ranking="1"/>
+	
+	<service ref="daoUserBiz" 
+		interface="net.solarnetwork.central.dras.biz.UserBiz"
+		ranking="1"/>
+	
+	<service ref="daoUserBiz" 
+		interface="net.solarnetwork.central.dras.biz.UserAdminBiz"
+		ranking="1"/>
+
+	<service ref="eventScheduler" interface="org.osgi.service.event.EventHandler">
+		<service-properties>
+			<entry key="#{T(org.osgi.service.event.EventConstants).EVENT_TOPIC}">
+				<array value-type="java.lang.String">
+					<value>net/solarnetwork/central/dras/ENTITY_UPDATE</value>
+				</array>
+			</entry>
+			<entry key="#{T(org.osgi.service.event.EventConstants).EVENT_FILTER}">
+				<value>(ClassName=net.solarnetwork.central.dras.domain.Event)</value>
+			</entry>
+		</service-properties>
+	</service>
+
+	<service ref="eventPublisher" interface="org.osgi.service.event.EventHandler">
+		<service-properties>
+			<entry key="#{T(org.osgi.service.event.EventConstants).EVENT_TOPIC}">
+				<array value-type="java.lang.String">
+					<value>net/solarnetwork/central/dras/ddrs/PUBLISH_EVENT</value>
+				</array>
+			</entry>
+		</service-properties>
+	</service>
+
+	<!-- Supporting Services -->
+	
+	<!-- Use Java @Transactional annotations to declare transactions. -->
+	<tx:annotation-driven transaction-manager="txManager"/>
+	
+	<!-- See http://forum.springsource.org/archive/index.php/t-54188.html for discussion
+		on getting component-scan to work in PDE. We are required to add are Eclipse build
+		path to the Bundle-Classpath value. -->
+	<ctx:annotation-config/>
+	<ctx:component-scan base-package="net.solarnetwork.central.dras.biz.dao"/>
+
+	<bean id="optionalEventExecutor" class="net.solarnetwork.util.OptionalServiceTracker">
+		<property name="service" ref="eventExecutor"/>
+	</bean>
+
+	<bean id="transactionTemplate" class="org.springframework.transaction.support.TransactionTemplate">
+		<property name="transactionManager" ref="txManager"/>
+	</bean>
+	
+</blueprint>
