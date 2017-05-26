@@ -54,6 +54,8 @@ import net.solarnetwork.central.dras.domain.User;
 import net.solarnetwork.central.dras.domain.UserGroup;
 import net.solarnetwork.central.dras.support.MembershipCommand;
 import net.solarnetwork.central.dras.support.MembershipCommand.Mode;
+import net.solarnetwork.pki.bc.BCPBKDF2PasswordEncoder;
+import net.solarnetwork.support.PasswordEncoder;
 
 /**
  * Test case for {@link UserBiz}.
@@ -68,6 +70,7 @@ public class DaoUserBizTest extends AbstractMyBatisDaoTestSupport {
 	private ProgramDao programDao;
 	private UserDao userDao;
 	private UserGroupDao userGroupDao;
+	private PasswordEncoder passwordEncoder;
 
 	private DaoUserBiz userBiz;
 
@@ -84,7 +87,10 @@ public class DaoUserBizTest extends AbstractMyBatisDaoTestSupport {
 		userGroupDao = new MyBatisUserGroupDao();
 		((SqlSessionDaoSupport) userGroupDao).setSqlSessionFactory(getSqlSessionFactory());
 
-		userBiz = new DaoUserBiz(effectiveDao, programDao, userDao, userGroupDao, constraintDao);
+		passwordEncoder = new BCPBKDF2PasswordEncoder();
+
+		userBiz = new DaoUserBiz(effectiveDao, programDao, userDao, userGroupDao, constraintDao,
+				passwordEncoder);
 
 		SecurityContextHolder.getContext()
 				.setAuthentication(new UsernamePasswordAuthenticationToken(TEST_USERNAME, "unittest"));

@@ -41,6 +41,9 @@
 	<reference id="userDao" interface="net.solarnetwork.central.dras.dao.UserDao"/>
 	<reference id="userGroupDao" interface="net.solarnetwork.central.dras.dao.UserGroupDao"/>
 	
+	<reference id="passwordEncoder" interface="net.solarnetwork.support.PasswordEncoder"
+		filter="(app=dras)"/>
+	
 	<!-- Published Services -->
 	
 	<service ref="daoEventBiz" 

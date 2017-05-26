@@ -27,7 +27,6 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -56,6 +55,7 @@ import net.solarnetwork.central.dras.domain.UserRole;
 import net.solarnetwork.central.dras.support.MembershipCommand;
 import net.solarnetwork.central.dras.support.SimpleProgramFilter;
 import net.solarnetwork.central.dras.support.UserInformation;
+import net.solarnetwork.support.PasswordEncoder;
 import net.solarnetwork.util.ClassUtils;
 
 /**
@@ -70,6 +70,7 @@ public class DaoUserBiz extends DaoBizSupport implements UserBiz, UserAdminBiz {
 	private final ProgramDao programDao;
 	private final UserGroupDao userGroupDao;
 	private final ConstraintDao constraintDao;
+	private final PasswordEncoder passwordEncoder;
 
 	/**
 	 * Construct with values.
@@ -84,15 +85,18 @@ public class DaoUserBiz extends DaoBizSupport implements UserBiz, UserAdminBiz {
 	 *        the UserGroupDao
 	 * @param constraintDao
 	 *        the ConstraintDao
+	 * @param passwordEncoder
+	 *        the password encoder to use
 	 */
 	@Autowired
 	public DaoUserBiz(EffectiveDao effectiveDao, ProgramDao programDao, UserDao userDao,
-			UserGroupDao userGroupDao, ConstraintDao constraintDao) {
+			UserGroupDao userGroupDao, ConstraintDao constraintDao, PasswordEncoder passwordEncoder) {
 		this.effectiveDao = effectiveDao;
 		this.programDao = programDao;
 		this.userDao = userDao;
 		this.userGroupDao = userGroupDao;
 		this.constraintDao = constraintDao;
+		this.passwordEncoder = passwordEncoder;
 	}
 
 	@Override
@@ -177,8 +181,8 @@ public class DaoUserBiz extends DaoBizSupport implements UserBiz, UserAdminBiz {
 
 		boolean changedPassword = false;
 		if ( entity.getPassword() != null && template.getPassword() != null ) {
-			String digest = DigestUtils.sha256Hex(template.getPassword());
-			if ( digest != entity.getPassword() ) {
+			String digest = passwordEncoder.encode(template.getPassword());
+			if ( !entity.getPassword().equals(digest) ) {
 				changedPassword = true;
 			}
 		} else if ( template.getPassword() != null ) {
@@ -190,7 +194,7 @@ public class DaoUserBiz extends DaoBizSupport implements UserBiz, UserAdminBiz {
 			entity.setEnabled(Boolean.TRUE);
 		}
 		if ( changedPassword ) {
-			entity.setPassword(DigestUtils.sha256Hex(entity.getPassword()));
+			entity.setPassword(passwordEncoder.encode(entity.getPassword()));
 		}
 
 		Long newUserId = userDao.store(entity);

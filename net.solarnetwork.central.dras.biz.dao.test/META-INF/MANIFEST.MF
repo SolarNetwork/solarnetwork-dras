@@ -17,6 +17,7 @@ Import-Package:
  net.solarnetwork.central.dras.dao.mybatis.map;version="1.0.0",
  net.solarnetwork.central.dras.dao.mybatis.test;version="1.0.0",
  net.solarnetwork.central.test;version="[1.6,2.0)",
+ net.solarnetwork.pki.bc;version="1.2.0",
  org.apache.ibatis.annotations;version="[3.2,4.0)",
  org.apache.ibatis.mapping;version="[3.2,4.0)",
  org.apache.ibatis.session;version="[3.2,4.0)",
