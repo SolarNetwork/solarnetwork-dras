@@ -52,7 +52,7 @@ CREATE TABLE solardras.dras_user
   id solardras.pk_i,
   created solardras.ts,
   username character varying(128) NOT NULL,
-  passwd character varying(64),
+  passwd character varying(88),
   disp_name character varying(128) NOT NULL,
   address character varying(128) ARRAY,
   vendor character varying(128),
