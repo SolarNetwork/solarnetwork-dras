@@ -22,24 +22,24 @@
 
 package net.solarnetwork.central.dras.aop;
 
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Before;
+import org.aspectj.lang.annotation.Pointcut;
 import net.solarnetwork.central.dao.ObjectCriteria;
 import net.solarnetwork.central.dras.dao.UserAwareFilter;
 import net.solarnetwork.central.dras.dao.UserDao;
 import net.solarnetwork.central.dras.support.EventCriteria;
 import net.solarnetwork.central.dras.support.ParticipantCriteria;
+import net.solarnetwork.central.dras.support.ParticipantGroupCriteria;
 import net.solarnetwork.central.dras.support.ProgramCriteria;
 import net.solarnetwork.central.dras.support.UserCriteria;
 import net.solarnetwork.central.dras.support.UserGroupCriteria;
-
-import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.Before;
-import org.aspectj.lang.annotation.Pointcut;
 
 /**
  * Security enforcer for ProgramBiz and ProgramAdminBiz.
  * 
  * @author matt
- * @version 1.0
+ * @version 1.1
  */
 @Aspect
 public class FilterSecurityAspect extends SecurityAspectSupport {
@@ -56,41 +56,47 @@ public class FilterSecurityAspect extends SecurityAspectSupport {
 	/**
 	 * Constructor.
 	 * 
-	 * @param userDao the UserDao
+	 * @param userDao
+	 *        the UserDao
 	 */
 	public FilterSecurityAspect(UserDao userDao) {
 		super(userDao);
 	}
-	
+
 	/**
 	 * Match Biz methods that accept a UserAwareFilter argument.
 	 * 
-	 * @param criteria the search criteria
+	 * @param criteria
+	 *        the search criteria
 	 */
 	@Pointcut("bean(aop*) && execution(* net.solarnetwork.central.dras.biz.*.*(..)) && args(criteria,..)")
-	public void searchMethod(ObjectCriteria<? extends UserAwareFilter> criteria) {}
+	public void searchMethod(ObjectCriteria<? extends UserAwareFilter> criteria) {
+	}
 
 	/**
-	 * Limit programs to current user unless user has {@link #PROGRAM_ADMIN_ROLE} role.
+	 * Limit programs to current user unless user has
+	 * {@link #PROGRAM_ADMIN_ROLE} role.
 	 * 
-	 * @param criteria the criteria to filter
+	 * @param criteria
+	 *        the criteria to filter
 	 */
 	@Before("searchMethod(criteria)")
 	public void enforceProgramSearchFilter(ObjectCriteria<? extends UserAwareFilter> criteria) {
 		final String[] adminRole;
 		if ( criteria instanceof EventCriteria ) {
-			adminRole = new String[] {EVENT_ADMIN_ROLE};
-		} else if ( criteria instanceof ParticipantCriteria ) {
-			adminRole = new String[] {EVENT_ADMIN_ROLE, PROGRAM_ADMIN_ROLE};
+			adminRole = new String[] { EVENT_ADMIN_ROLE };
+		} else if ( criteria instanceof ParticipantCriteria
+				|| criteria instanceof ParticipantGroupCriteria ) {
+			adminRole = new String[] { EVENT_ADMIN_ROLE, PROGRAM_ADMIN_ROLE };
 		} else if ( criteria instanceof ProgramCriteria ) {
-			adminRole = new String[] {PROGRAM_ADMIN_ROLE};
+			adminRole = new String[] { PROGRAM_ADMIN_ROLE };
 		} else if ( criteria instanceof UserCriteria || criteria instanceof UserGroupCriteria ) {
-			adminRole = new String[] {USER_ADMIN_ROLE};
+			adminRole = new String[] { USER_ADMIN_ROLE };
 		} else {
-			throw new IllegalArgumentException("Criteria type [" 
-					+criteria.getClass().getSimpleName() +" not supported.");
+			throw new IllegalArgumentException(
+					"Criteria type [" + criteria.getClass().getSimpleName() + " not supported.");
 		}
 		enforceFilterUser(criteria.getSimpleFilter(), adminRole);
 	}
-	
+
 }
