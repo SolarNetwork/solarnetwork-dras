@@ -37,8 +37,8 @@ CREATE TABLE solardras.loc
   gxp character varying(128),
   icp character varying(128),
   address character varying(256),
-  latitude double precision,
-  longitude double precision,
+  latitude NUMERIC(9,6),
+  longitude NUMERIC(9,6),
   fts_default tsvector,
   CONSTRAINT loc_pkey PRIMARY KEY (id)
 );
