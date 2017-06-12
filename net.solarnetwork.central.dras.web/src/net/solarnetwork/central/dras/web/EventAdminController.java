@@ -24,21 +24,23 @@ package net.solarnetwork.central.dras.web;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-
-import net.solarnetwork.central.dras.biz.EventAdminBiz;
-import net.solarnetwork.central.dras.domain.EffectiveCollection;
-import net.solarnetwork.central.dras.domain.Event;
-import net.solarnetwork.central.dras.domain.Member;
-import net.solarnetwork.central.dras.web.support.EventCommand;
-import net.solarnetwork.web.support.WebUtils;
-
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.Errors;
+import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import net.solarnetwork.central.dras.biz.EventAdminBiz;
+import net.solarnetwork.central.dras.domain.EffectiveCollection;
+import net.solarnetwork.central.dras.domain.Event;
+import net.solarnetwork.central.dras.domain.Member;
+import net.solarnetwork.central.dras.web.support.EventCommand;
+import net.solarnetwork.util.JodaDateFormatEditor;
+import net.solarnetwork.web.support.WebUtils;
 
 /**
  * Controller for EventAdmin API.
@@ -55,33 +57,51 @@ public class EventAdminController extends ControllerSupport {
 	/**
 	 * Constructor.
 	 * 
-	 * @param eventAdminBiz the EventAdminBiz to use
+	 * @param eventAdminBiz
+	 *        the EventAdminBiz to use
 	 */
 	@Autowired
 	public EventAdminController(EventAdminBiz eventAdminBiz) {
 		this.eventAdminBiz = eventAdminBiz;
+
 	}
-	
+
+	private final String DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
+
+	@InitBinder
+	public void binder(WebDataBinder binder) {
+		// FIXME this shouldn't be done here but in the Spring configuration
+		binder.registerCustomEditor(DateTime.class, "notificationDate",
+				new JodaDateFormatEditor(DATE_TIME_FORMAT));
+		binder.registerCustomEditor(DateTime.class, "eventDate",
+				new JodaDateFormatEditor(DATE_TIME_FORMAT));
+		binder.registerCustomEditor(DateTime.class, "endDate",
+				new JodaDateFormatEditor(DATE_TIME_FORMAT));
+	}
+
 	/**
 	 * Store a new Event.
 	 * 
-	 * @param request the servlet request
-	 * @param model the model
-	 * @param input the input data
-	 * @param errors the binding errors
+	 * @param request
+	 *        the servlet request
+	 * @param model
+	 *        the model
+	 * @param input
+	 *        the input data
+	 * @param errors
+	 *        the binding errors
 	 * @return view name
 	 */
 	// FIXME: remove GET support, only for testing
-	@RequestMapping(method = {RequestMethod.GET, RequestMethod.POST}, 
-			value = {"/addEvent.*", "/saveEvent.*"})
-	public String createEvent(HttpServletRequest request, 
-			Model model, @Valid EventCommand input, Errors errors) {
+	@RequestMapping(method = { RequestMethod.GET, RequestMethod.POST }, value = { "/addEvent.*",
+			"/saveEvent.*" })
+	public String createEvent(HttpServletRequest request, Model model, @Valid EventCommand input,
+			Errors errors) {
 		try {
 			Event newEvent = eventAdminBiz.storeEvent(input.getEvent());
 			model.addAttribute(MODEL_KEY_RESULT, newEvent);
 		} catch ( DuplicateKeyException e ) {
-			log.debug("Duplicate key violation adding new event [{}]", 
-					input.getEvent().getName());
+			log.debug("Duplicate key violation adding new event [{}]", input.getEvent().getName());
 			errors.rejectValue("event.name", "name.taken");
 		}
 		return WebUtils.resolveViewFromUrlExtension(request, getViewName());
@@ -90,21 +110,23 @@ public class EventAdminController extends ControllerSupport {
 	/**
 	 * Assign participants to an Event.
 	 * 
-	 * @param request the servlet request
-	 * @param model the model
-	 * @param p the input data
-	 * @param g the input data
+	 * @param request
+	 *        the servlet request
+	 * @param model
+	 *        the model
+	 * @param p
+	 *        the input data
+	 * @param g
+	 *        the input data
 	 * @return view name
 	 */
 	// FIXME: remove GET support, only for testing
-	@RequestMapping(method = {RequestMethod.GET, RequestMethod.POST}, 
-			value = "/assignMembers.*")
-	public String assignUserGroupMembers(HttpServletRequest request, Model model, 
-			EventCommand input) {
-		EffectiveCollection<Event, ? extends Member> result
-			= eventAdminBiz.assignMembers(input.getEvent().getId(), input.getP(), input.getG());
+	@RequestMapping(method = { RequestMethod.GET, RequestMethod.POST }, value = "/assignMembers.*")
+	public String assignUserGroupMembers(HttpServletRequest request, Model model, EventCommand input) {
+		EffectiveCollection<Event, ? extends Member> result = eventAdminBiz
+				.assignMembers(input.getEvent().getId(), input.getP(), input.getG());
 		model.addAttribute(MODEL_KEY_RESULT, result);
 		return WebUtils.resolveViewFromUrlExtension(request, getViewName());
 	}
-	
+
 }
