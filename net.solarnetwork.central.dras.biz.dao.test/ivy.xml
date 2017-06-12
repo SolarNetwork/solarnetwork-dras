@@ -19,12 +19,12 @@
 		
 		<!-- Testing support -->
 		<dependency org="org.mybatis" name="mybatis" rev="3.2.8"/>
-		
-		<!-- SolarNetwork -->
+		<dependency org="net.solarnetwork.common" name="net.solarnetwork.common.pki.bc" rev="latest.release"/>
 		<dependency org="net.solarnetwork.central" name="net.solarnetwork.central.common.dao.mybatis" rev="latest.release"/>
-		<dependency org="net.solarnetwork.central" name="net.solarnetwork.central.common.mail.mock" rev="latest.release"/>
 		<dependency org="net.solarnetwork.central" name="net.solarnetwork.central.datum.dao.mybatis" rev="latest.release"/>
 		<dependency org="net.solarnetwork.central.dras" name="net.solarnetwork.central.dras.dao.mybatis" rev="latest.release"/>
- 		<dependency org="net.solarnetwork.central.dras.test" name="net.solarnetwork.central.dras.dao.mybatis.test" rev="latest.release"/>
+		<dependency org="net.solarnetwork.central.dras.test" name="net.solarnetwork.central.dras.dao.mybatis.test" rev="latest.release"/>
+		
+		<!-- SolarNetwork -->
     </dependencies>
 </ivy-module>

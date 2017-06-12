@@ -81,8 +81,8 @@ public class MyBatisLocationDaoTest extends AbstractMyBatisDaoTestSupport {
 		assertEquals(location.getGxp(), entity.getGxp());
 		assertEquals(location.getIcp(), entity.getIcp());
 		assertEquals(location.getId(), entity.getId());
-		assertEquals(location.getLatitude(), entity.getLatitude());
-		assertEquals(location.getLongitude(), entity.getLongitude());
+		assertEquals(location.getLatitude().doubleValue(), entity.getLatitude().doubleValue(), 0.0001);
+		assertEquals(location.getLongitude().doubleValue(), entity.getLongitude().doubleValue(), 0.0001);
 		assertEquals(location.getName(), entity.getName());
 		assertEquals(location.getPostalCode(), entity.getPostalCode());
 		assertEquals(location.getRegion(), entity.getRegion());
