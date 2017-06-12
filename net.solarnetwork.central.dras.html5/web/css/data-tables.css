@@ -43,6 +43,8 @@ table.display thead th {
 
 div.dataTables_wrapper .ui-widget-header {
     font-weight: normal;
+    background-color: #f6f6f6;
+/*     background-color: #FFF; */
 }
 
 

@@ -1,10 +1,11 @@
-<h1><fmt:message key="events.title"/></h1>
+<h1 class="title"><fmt:message key="events.title"/></h1>
+<div class="clear"></div>
 	
 <div class="panel ui-corner-all">
 	
-	<div class="dras-toolbar fg-toolbar ui-toolbar ui-widget-header ui-corner-all ui-helper-clearfix">
+	<div class="dras-toolbar fg-toolbar ui-toolbar ui-widget-header ui-helper-clearfix">
 		<div class="programSelector">Program: <select id="eventProgramSelector"></select></div>
-		<div class="eventCreator"><button class="ui-button-text newEventButton" id="newEventButton">New Event</button></div>
+		<div class="eventCreator"><button class=" ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only newEventButton" id="newEventButton">New Event</button></div>
 	</div>
 	 
 	

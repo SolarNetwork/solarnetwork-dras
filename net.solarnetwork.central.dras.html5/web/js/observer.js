@@ -130,6 +130,8 @@ SolarNetwork.DRAS.ObserverHelper = function(config) {
 	 * @return an object with the map and latLngBounds that were used when dispaying the map.
 	 */
 	this.loadEventDialogTabs = function(eventDialogId, mapCanvasId, eventId, participantsTableId, groupTableId, mapTableId) {
+		SolarNetwork.debug('Loading event dialog tabs for event %s into %s', eventId, groupTableId);
+		
 		// Setup the participant tabs
 		$('.eventParticipantTabs').tabs({selected: 0});
 

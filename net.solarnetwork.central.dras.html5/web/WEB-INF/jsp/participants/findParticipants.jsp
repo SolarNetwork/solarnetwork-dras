@@ -1,6 +1,6 @@
 <div class="leftPanel"><div class="panel ui-corner-all">
 	<div class="flatPanel">
-		<input type="text" class="eventMemberSearch"/><button class="findParticipantsButton" type="button">Find Participants</button>
+		<input type="text" class="eventMemberSearch"/><button class="findParticipantsButton" type="button" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">Find Participants</button>
 	</div>
 	
 	<div id="${param.mapCanvasId}" class="editEventMap"></div>

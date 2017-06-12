@@ -8,7 +8,7 @@
 		<tr><td>Notification Date: </td><td><input type="text" name="notificationDate" class="datetimepicker required" value=""></input></td></tr>
 		<tr><td>Event Date: </td><td><input type="text" name="eventDate" class="datetimepicker required" value=""></input></td></tr>
 		<tr><td>End Date: </td><td><input type="text" name="endDate" class="datetimepicker required" value=""></input></td></tr>
-		<tr><td></td><td><input id="updateEventButton" type="submit" value="Save"></td></tr>
+		<tr><td></td><td><input id="updateEventButton" type="submit" value="Save" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only"></td></tr>
 	</table>
 </form>
 
@@ -17,9 +17,9 @@
 	
 <div class="eventParticipantTabs">
 	<ul>
-		<li><a href="#editEventMap">Map</a></li>
-		<li><a href="#editEventParticpants">Participants (<span class="eventParticipantCount">0</span>)</a></li>
-		<li><a href="#editEventGroups">Groups (<span class="eventGroupCount">0</span>)</a></li>
+		<li><a href="#editEventMap" class="ui-tabs-anchor">Map</a></li>
+		<li><a href="#editEventParticpants" class="ui-tabs-anchor">Participants (<span class="eventParticipantCount">0</span>)</a></li>
+		<li><a href="#editEventGroups" class="ui-tabs-anchor">Groups (<span class="eventGroupCount">0</span>)</a></li>
 	</ul>
 	<div id="editEventMap">
 		<jsp:include page="/WEB-INF/jsp/participants/findParticipants.jsp">

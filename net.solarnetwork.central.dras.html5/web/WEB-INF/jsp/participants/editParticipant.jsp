@@ -20,4 +20,4 @@
 </jsp:include>
 
 
-<button type="button" id="editParticipantButton"><fmt:message key="program.participantDialog.edit"/></button>
+<button type="button" id="editParticipantButton" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only"><fmt:message key="program.participantDialog.edit"/></button>

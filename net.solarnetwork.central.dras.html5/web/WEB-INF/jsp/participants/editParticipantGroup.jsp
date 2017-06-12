@@ -21,12 +21,12 @@
 <%-- Form used to store the group members for submission --%>
 <form id="editParticipantGroupMembersForm" method="POST" style="display:none"></form>
 
-<button type="button" id="editParticipantGroupButton"><fmt:message key="program.participantGroupDialog.edit"/></button>
+<button type="button" id="editParticipantGroupButton" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only"><fmt:message key="program.participantGroupDialog.edit"/></button>
 
 <div class="groupParticipantTabs">
 	<ul>
-		<li><a href="#editGroupMap">Map</a></li>
-		<li><a href="#editGroupParticpants">Participants (<span class="groupParticipantCount">0</span>)</a></li>
+		<li><a href="#editGroupMap" class="ui-tabs-anchor">Map</a></li>
+		<li><a href="#editGroupParticpants" class="ui-tabs-anchor">Participants (<span class="groupParticipantCount">0</span>)</a></li>
 	</ul>
 	<div id="editGroupMap">
 		<jsp:include page="/WEB-INF/jsp/participants/findParticipants.jsp">

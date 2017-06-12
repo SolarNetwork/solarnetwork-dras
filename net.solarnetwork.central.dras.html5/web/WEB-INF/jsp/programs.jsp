@@ -1,5 +1,5 @@
 <div>
-<h1 class="title"><fmt:message key="programs.title"/></h1><button id="newProgramButton" type="button" class="titleButton"><fmt:message key="program.new"/></button>
+<h1 class="title"><fmt:message key="programs.title"/></h1><button id="newProgramButton" type="button" class="titleButton ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only"><fmt:message key="program.new"/></button>
 <div class="clear"></div>
 </div>
 
@@ -14,7 +14,7 @@
 
 <div class="rightPanel"><div class="panel ui-corner-all">
 
-	<div id="newProgramPanel" class="programDetails">
+	<div id="newProgramPanel" class="programDetails" style="display:none">
 		<jsp:include page="programs/newProgram.jsp"></jsp:include>
 	</div>
 

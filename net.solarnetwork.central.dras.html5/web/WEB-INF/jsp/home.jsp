@@ -1,4 +1,5 @@
-<h1><fmt:message key="home.events.title"/></h1>
+<h1 class="title"><fmt:message key="home.events.title"/></h1>
+<div class="clear"></div>
 
 <div class="leftPanel"><div class="panel ui-corner-all">
 	<div id="eventMapCanvis" class="eventMap"></div>

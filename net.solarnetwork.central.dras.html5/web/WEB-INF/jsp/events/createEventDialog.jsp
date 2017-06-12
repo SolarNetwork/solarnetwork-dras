@@ -7,7 +7,7 @@
 		<tr><td>Event Date: </td><td><input type="text" name="eventDate" class="datetimepicker required" value=""></input></td></tr>
 		<tr><td>End Date: </td><td><input type="text" name="endDate" class="datetimepicker required" value=""></input></td></tr>
 		<%--<tr><td>Duration: </td><td><input type="text" name="eventDuration" class="timepicker required" value=""></input></td></tr> --%>
-		<tr><td></td><td><input type="submit" value="Create"></td></tr>
+		<tr><td></td><td><input type="submit" value="Create" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only"></td></tr>
 	</table>
 	
 </form>
@@ -17,9 +17,9 @@
 	
 <div class="eventParticipantTabs">
 	<ul>
-		<li><a href="#createEventMap">Map</a></li>
-		<li><a href="#createEventParticpants">Participants (<span class="eventParticipantCount">0</span>)</a></li>
-		<li><a href="#createEventGroups">Groups (<span class="eventGroupCount">0</span>)</a></li>
+		<li><a href="#createEventMap" class="ui-tabs-anchor">Map</a></li>
+		<li><a href="#createEventParticpants" class="ui-tabs-anchor">Participants (<span class="eventParticipantCount">0</span>)</a></li>
+		<li><a href="#createEventGroups" class="ui-tabs-anchor">Groups (<span class="eventGroupCount">0</span>)</a></li>
 	</ul>
 	<div id="createEventMap">
 		<jsp:include page="/WEB-INF/jsp/participants/findParticipants.jsp">

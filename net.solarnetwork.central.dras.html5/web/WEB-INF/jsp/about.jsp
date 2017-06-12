@@ -1,4 +1,5 @@
-<h1><fmt:message key="about.title"/></h1>
+<h1 class="title"><fmt:message key="about.title"/></h1>
+<div class="clear"></div>
 
 
 <table id="about-table" class="display left">

@@ -49,7 +49,7 @@ SolarNetwork.DRAS.OperatorHelper = function(config) {
 		// Display the dialog
 		$('#editEventDialog input[name="event.programId"]').val($("#eventProgramSelector option:selected").attr('value'));
 		$('#editEventDialog').dialog({"modal" :true, "draggable": false, "title" : "Edit Event: " + eventId, "resizable" : false, "minWidth": 1000, "minHeight": 600});
-
+		
 		// Load the event member tabs
 		observerHelper.loadEventDialogTabs("#editEventDialog", 'editEventMapCanvis', eventId, '#editEventParticipantTable', '#editEventGroupTable', '#editEventMapTable');
 	};
