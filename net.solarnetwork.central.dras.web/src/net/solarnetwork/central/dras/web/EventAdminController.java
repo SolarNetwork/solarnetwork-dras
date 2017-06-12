@@ -71,12 +71,7 @@ public class EventAdminController extends ControllerSupport {
 	@InitBinder
 	public void binder(WebDataBinder binder) {
 		// FIXME this shouldn't be done here but in the Spring configuration
-		binder.registerCustomEditor(DateTime.class, "notificationDate",
-				new JodaDateFormatEditor(DATE_TIME_FORMAT));
-		binder.registerCustomEditor(DateTime.class, "eventDate",
-				new JodaDateFormatEditor(DATE_TIME_FORMAT));
-		binder.registerCustomEditor(DateTime.class, "endDate",
-				new JodaDateFormatEditor(DATE_TIME_FORMAT));
+		binder.registerCustomEditor(DateTime.class, new JodaDateFormatEditor(DATE_TIME_FORMAT));
 	}
 
 	/**
