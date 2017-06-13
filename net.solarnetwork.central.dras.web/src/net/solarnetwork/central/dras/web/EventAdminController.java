@@ -24,14 +24,11 @@ package net.solarnetwork.central.dras.web;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.Errors;
-import org.springframework.web.bind.WebDataBinder;
-import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import net.solarnetwork.central.dras.biz.EventAdminBiz;
@@ -39,7 +36,6 @@ import net.solarnetwork.central.dras.domain.EffectiveCollection;
 import net.solarnetwork.central.dras.domain.Event;
 import net.solarnetwork.central.dras.domain.Member;
 import net.solarnetwork.central.dras.web.support.EventCommand;
-import net.solarnetwork.util.JodaDateFormatEditor;
 import net.solarnetwork.web.support.WebUtils;
 
 /**
@@ -52,7 +48,7 @@ import net.solarnetwork.web.support.WebUtils;
 @RequestMapping("/event/admin")
 public class EventAdminController extends ControllerSupport {
 
-	private EventAdminBiz eventAdminBiz;
+	private final EventAdminBiz eventAdminBiz;
 
 	/**
 	 * Constructor.
@@ -63,15 +59,6 @@ public class EventAdminController extends ControllerSupport {
 	@Autowired
 	public EventAdminController(EventAdminBiz eventAdminBiz) {
 		this.eventAdminBiz = eventAdminBiz;
-
-	}
-
-	private final String DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
-
-	@InitBinder
-	public void binder(WebDataBinder binder) {
-		// FIXME this shouldn't be done here but in the Spring configuration
-		binder.registerCustomEditor(DateTime.class, new JodaDateFormatEditor(DATE_TIME_FORMAT));
 	}
 
 	/**

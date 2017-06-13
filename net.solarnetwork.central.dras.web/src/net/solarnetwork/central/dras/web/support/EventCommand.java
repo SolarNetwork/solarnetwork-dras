@@ -23,13 +23,11 @@
 package net.solarnetwork.central.dras.web.support;
 
 import javax.validation.constraints.NotNull;
-
-import net.solarnetwork.central.dras.domain.Event;
-import net.solarnetwork.central.dras.support.MembershipCommand;
-
 import org.joda.time.DateTime;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
+import net.solarnetwork.central.dras.domain.Event;
+import net.solarnetwork.central.dras.support.MembershipCommand;
 
 /**
  * Command object for Event updates.
@@ -41,37 +39,47 @@ public class EventCommand {
 
 	@NotNull
 	private Event event = new Event();
-	
+
 	private MembershipCommand p;
 	private MembershipCommand g;
 
-	public void setNotificationDate(@DateTimeFormat(iso=ISO.DATE_TIME) DateTime date) {
+	@DateTimeFormat(iso = ISO.DATE_TIME)
+	public void setNotificationDate(DateTime date) {
 		event.setNotificationDate(date);
 	}
-	public void setEventDate(@DateTimeFormat(iso=ISO.DATE_TIME) DateTime date) {
+
+	@DateTimeFormat(iso = ISO.DATE_TIME)
+	public void setEventDate(DateTime date) {
 		event.setEventDate(date);
 	}
-	public void setEndDate(@DateTimeFormat(iso=ISO.DATE_TIME) DateTime date) {
+
+	@DateTimeFormat(iso = ISO.DATE_TIME)
+	public void setEndDate(DateTime date) {
 		event.setEndDate(date);
 	}
-	
+
 	public Event getEvent() {
 		return event;
 	}
+
 	public void setEvent(Event event) {
 		this.event = event;
 	}
+
 	public MembershipCommand getP() {
 		return p;
 	}
+
 	public void setP(MembershipCommand p) {
 		this.p = p;
 	}
+
 	public MembershipCommand getG() {
 		return g;
 	}
+
 	public void setG(MembershipCommand g) {
 		this.g = g;
 	}
-	
+
 }
