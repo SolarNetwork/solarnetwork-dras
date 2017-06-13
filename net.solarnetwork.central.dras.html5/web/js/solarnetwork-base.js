@@ -168,6 +168,7 @@ var SolarNetwork = {
 				count++;
 			}	
 		}
+		return count;
 	},
 	
 	whitespaceRegexp : /^\s+$/,

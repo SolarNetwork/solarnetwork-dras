@@ -19,12 +19,12 @@
 <%-- Form used to store the group members for submission --%>
 <form id="newParticipantGroupMembersForm" method="POST" style="display:none"></form>
 
-<button type="button" id="createParticipantGroupButton"><fmt:message key="program.participantGroupDialog.create"/></button>
+<button type="button" id="createParticipantGroupButton" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only"><fmt:message key="program.participantGroupDialog.create"/></button>
 
 <div class="groupParticipantTabs">
 	<ul>
-		<li><a href="#newGroupMap">Map</a></li>
-		<li><a href="#newGroupParticpants">Participants (<span class="groupParticipantCount">0</span>)</a></li>
+		<li><a href="#newGroupMap" class="ui-tabs-anchor">Map</a></li>
+		<li><a href="#newGroupParticpants" class="ui-tabs-anchor">Participants (<span class="groupParticipantCount">0</span>)</a></li>
 	</ul>
 	<div id="newGroupMap">
 		<jsp:include page="/WEB-INF/jsp/participants/findParticipants.jsp">

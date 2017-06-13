@@ -10,7 +10,7 @@
 	<body>
 		<jsp:include page="/WEB-INF/jsp/includes/banner.jsp"/>
 	
-		<div id="tabs" class="ui-tabs ui-widget ui-widget-content ui-corner-all bodyPanel">
+		<div id="tabs" class="ui-tabs ui-widget ui-widget-content">
 			<header>
 				<jsp:include page="/WEB-INF/jsp/includes/tabs.jsp">
 					<jsp:param name="tab" value="${tab}" /> 

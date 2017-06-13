@@ -18,4 +18,4 @@
 </jsp:include>
 
 
-<button type="button" id="createParticipantButton"><fmt:message key="program.participantDialog.create"/></button>
+<button type="button" id="createParticipantButton" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only"><fmt:message key="program.participantDialog.create"/></button>

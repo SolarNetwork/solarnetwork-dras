@@ -1,15 +1,14 @@
 <title><fmt:message key="app.name"/></title>
 <link rel="shortcut icon" href="<c:url value='/images/favicon.ico'/>" />
 <%--
-Pacj isn't taking the image root into account
+Pack isn't taking the image root into account
 <pack:style>
 	<src>/css/global.css</src>
 </pack:style>
-<pack:style>
-	<src>/css/cupertino/jquery-ui-1.8.13.custom.css</src>
-</pack:style>
 --%>
-<link rel="stylesheet" type="text/css" href="<c:url value='/css/smoothness/jquery-ui-1.8.13.custom.css'/>" />
+<%-- <link rel="stylesheet" type="text/css" href="<c:url value='/css/flat/jquery-ui.min.css'/>" /> --%>
+<link rel="stylesheet" type="text/css" href="<c:url value='/css/base/jquery-ui.min.css'/>" />
+<%-- <link rel="stylesheet" type="text/css" href="<c:url value='/css/base/jquery-ui.theme.min.css'/>" /> --%>
 <link rel="stylesheet" type="text/css" href="<c:url value='/css/data-tables.css'/>" />
 <link rel="stylesheet" type="text/css" href="<c:url value='/css/global.css'/>" />
 
@@ -17,7 +16,7 @@ Pacj isn't taking the image root into account
 
 <pack:script>
 	<src>/js-lib/jquery-1.6.1.js</src>
-	<src>/js-lib/jquery-ui-1.8.13.custom.min.js</src>
+	<src>/js-lib/jquery-ui.min.js</src>
 	<src>/js-lib/jquery.dataTables.min.js</src>
 	<src>/js-lib/jquery-ui-timepicker-addon.js</src>
 	<src>/js-lib/jquery.validate.min.js</src>

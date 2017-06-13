@@ -1,4 +1,4 @@
-<div class="banner ui-corner-all ui-widget-header bodyPanel">
+<div class="banner ui-widget-header">
 	<div class="bannerImage"><img 
 		src='<c:url value="/images/SolarADR-Logo-4-Banner.png"/>'
 		alt='<fmt:message key="app.name"/>' /></div>

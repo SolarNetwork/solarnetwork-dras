@@ -16,7 +16,7 @@
 			<tr>
 				<td></td>
 				<td>
-					<input type="submit" value="<fmt:message key='login.login.label'/>" />
+					<input type="submit" value="<fmt:message key='login.login.label'/>" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only"/>
 				</td>
 			</tr>
 		</table>
