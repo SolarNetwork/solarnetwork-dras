@@ -250,6 +250,9 @@ SolarNetwork.DRAS.ProgramHelper = function(config) {
 				$('#newParticipantForm').submit();
 			}
 		});
+		$('#newParticipantLocationForm button.geocodeButton').click(function() {
+			programHelper.geocodeLocation('#newParticipantLocationForm');
+		});
 		$('#newParticipantForm').ajaxForm({
 			url : this.participantUrl('/admin/addParticipant.json'),
 			dataType : 'json',
@@ -329,6 +332,9 @@ SolarNetwork.DRAS.ProgramHelper = function(config) {
 				$('#editParticipantForm').submit();
 			}
 		});
+		$('#editParticipantLocationForm button.geocodeButton').click(function() {
+			programHelper.geocodeLocation('#editParticipantLocationForm');
+		});
 		$('#editParticipantForm').ajaxForm({
 			url : this.participantUrl('/admin/saveParticipant.json'),
 			dataType : 'json',
@@ -404,6 +410,9 @@ SolarNetwork.DRAS.ProgramHelper = function(config) {
 				// Submit the new group form now that we've created the location
 				$('#newParticipantGroupForm').submit();
 			}
+		});
+		$('#newParticipantGroupLocationForm button.geocodeButton').click(function() {
+			programHelper.geocodeLocation('#editParticipantGroupLocationForm');
 		});
 		$('#newParticipantGroupForm').ajaxForm({
 			url : this.participantUrl('/admin/addParticipantGroup.json'),
@@ -500,6 +509,9 @@ SolarNetwork.DRAS.ProgramHelper = function(config) {
 				// Submit the edit group form now that we've created the location
 				$('#editParticipantGroupForm').submit();
 			}
+		});
+		$('#editParticipantGroupLocationForm button.geocodeButton').click(function() {
+			programHelper.geocodeLocation('#editParticipantGroupLocationForm');
 		});
 		$('#editParticipantGroupForm').ajaxForm({
 			url : this.participantUrl('/admin/saveParticipantGroup.json'),
@@ -702,6 +714,33 @@ SolarNetwork.DRAS.ProgramHelper = function(config) {
 
 		
 	};
+	
+	/**
+	 * Uses the address fields in the specified location form to look up the lat/long values.
+	 */
+	this.geocodeLocation = function(locationFormId) {
+		var geocoder = new google.maps.Geocoder();
+		var address = [
+			$(locationFormId +' input[name="locality"]').val(),
+			$(locationFormId +' input[name="stateOrProvince"]').val(),
+			$(locationFormId +' input[name="region"]').val(),
+			$(locationFormId +' input[name="postalCode"]').val(),
+			$(locationFormId +' input[name="country"]').val()
+			];
+		
+		geocoder.geocode({'address': address.join(", ")}, function(results, status) {
+        	if (status === 'OK') {
+        		SolarNetwork.debug('Found location: ' + results[0].geometry.location);
+    			$(locationFormId +' input[name="latitude"]').val(results[0].geometry.location.lat);
+    			$(locationFormId +' input[name="longitude"]').val(results[0].geometry.location.lng);
+        	} else {
+        		SolarNetwork.debug('Geocode was not successful for the following reason: ' + status);
+        	}
+        });
+		
+		return false;
+	}
+	
 	
 	init(config);
 	

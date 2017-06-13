@@ -7,10 +7,10 @@
 	<div class="leftPanel">
 		<table class="dialogTable">
 			<tr><td class="dialogTableLabel">Name: </td><td><input name="name" type="text" class=" required"></td></tr>
-			<tr><td class="dialogTableLabel">Latitude: </td><td><input name="latitude" type="text" class=" required"></td></tr>
-			<tr><td class="dialogTableLabel">Longitude: </td><td><input name="longitude" type="text" class=" required"></td></tr>
 			<tr><td class="dialogTableLabel">GXP: </td><td><input name="gxp" type="text"></td></tr>
 			<tr><td class="dialogTableLabel">ICP: </td><td><input name="icp" type="text"></td></tr>
+			<tr><td class="dialogTableLabel">Latitude: </td><td><input name="latitude" type="text" class=" required"></td></tr>
+			<tr><td class="dialogTableLabel">Longitude: </td><td><input name="longitude" type="text" class=" required"></td></tr>
 		</table>
 	</div>
 	
@@ -21,6 +21,7 @@
 			<tr><td class="dialogTableLabel">State/Province: </td><td><input name="stateOrProvince" type="text"></td></tr>
 			<tr><td class="dialogTableLabel">Post Code: </td><td><input name="postalCode" type="text" class=" required"></td></tr>
 			<tr><td class="dialogTableLabel">Country: </td><td><input name="country" type="text"></td></tr>
+			<tr><td class="dialogTableLabel"></td><td><button type="button" class="geocodeButton ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">Geocode Address</button></td></tr>
 		</table>
 	</div>
 	
